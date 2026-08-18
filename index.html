@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CascadeCanvas | Keita Higashi</title>
+  <meta name="description" content="CascadeCanvas（カスケードキャンバス）は、「連鎖を読み解く」新感覚のめくりパズルです。100の名画を解き明かせ。">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f14;
+      --surface: #1a1a26;
+      --border: #2e2e42;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --text: #e8e4d8;
+      --text-sub: #9a9080;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Georgia', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 28px 24px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .site-name {
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      color: var(--text-sub);
+      text-transform: uppercase;
+    }
+    .lang-badge {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 72px 24px 56px;
+      text-align: center;
+    }
+    .app-icon {
+      width: 120px;
+      height: 120px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, #2a2a3e 0%, #1a1a26 100%);
+      border: 1px solid var(--border);
+      margin: 0 auto 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .app-name-ja {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: normal;
+      letter-spacing: 0.05em;
+      color: var(--gold-light);
+      margin-bottom: 4px;
+    }
+    .app-name-en {
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+      letter-spacing: 0.25em;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .tagline-ja {
+      font-size: clamp(1rem, 3vw, 1.25rem);
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .tagline-en {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      font-style: italic;
+      margin-bottom: 40px;
+    }
+    .download-btn {
+      display: inline-block;
+      background: var(--gold);
+      color: #0f0f14;
+      text-decoration: none;
+      padding: 14px 36px;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .download-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .download-btn:active { transform: translateY(0); }
+    .platform-note {
+      margin-top: 12px;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      max-width: 900px;
+      margin: 0 auto;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Features ── */
+    .features {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 56px 24px;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 40px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+    }
+    .feature-icon { font-size: 1.6rem; margin-bottom: 14px; }
+    .feature-title-ja {
+      font-size: 1rem;
+      color: var(--gold-light);
+      margin-bottom: 4px;
+    }
+    .feature-title-en {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .feature-desc-ja {
+      font-size: 0.88rem;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.75;
+    }
+    .feature-desc-en {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      line-height: 1.65;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-style: italic;
+    }
+
+    /* ── Gallery teaser ── */
+    .gallery-section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+      text-align: center;
+    }
+    .gallery-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 24px;
+    }
+    .gallery-number {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .gallery-label-ja { font-size: 1.1rem; margin-bottom: 6px; }
+    .gallery-label-en {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      font-style: italic;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .footer-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .footer-links a {
+      color: var(--text-sub);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--gold); }
+    .copyright {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 48px 20px 40px; }
+      .features { padding: 40px 20px; }
+      .gallery-section { padding: 0 20px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="site-name">Keita Higashi</span>
+    <span class="lang-badge">JA / EN</span>
+  </header>
+
+  <section class="hero">
+    <div class="app-icon">🖼️</div>
+    <h1 class="app-name-ja">カスケードキャンバス</h1>
+    <p class="app-name-en">CascadeCanvas</p>
+    <p class="tagline-ja">連鎖を読み解く、めくりパズル</p>
+    <p class="tagline-en">A chain-reading flip puzzle that reveals hidden masterpieces</p>
+    <a class="download-btn" href="https://apps.apple.com/jp/app/cascadecanvas-%E9%80%A3%E9%8E%96%E3%82%81%E3%81%8F%E3%82%8A%E3%83%91%E3%82%BA%E3%83%AB/id6794664453" target="_blank" rel="noopener">
+      App Store でダウンロード
+    </a>
+    <p class="platform-note">Available on the App Store &nbsp;·&nbsp; iOS</p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="features">
+    <p class="section-label">Features</p>
+    <div class="feature-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">✚</div>
+        <p class="feature-title-ja">一手で、十字に反転</p>
+        <p class="feature-title-en">Cross Flip in One Tap</p>
+        <p class="feature-desc-ja">タップしたパネルと上下左右が一斉に反転。シンプルなルールなのに、盤面は思わぬ動きを見せます。</p>
+        <p class="feature-desc-en">Tap a panel to flip it and all four adjacent panels at once. Simple rules, surprisingly deep consequences.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⛓️</div>
+        <p class="feature-title-ja">連鎖して、広がる</p>
+        <p class="feature-title-en">Chain Reactions</p>
+        <p class="feature-desc-ja">特殊パネルが反転範囲に入ると、行や列を一直線に反転させる連鎖が発生。連鎖がさらに連鎖を呼びます。</p>
+        <p class="feature-desc-en">Special panels trigger row or column flips, which can cascade further. Plan the chain before you tap.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <p class="feature-title-ja">タップ前に、"先読み"する</p>
+        <p class="feature-title-en">Think Before You Tap</p>
+        <p class="feature-desc-ja">総当たりではなく「読む」ことが面白さの核心。最短手順を見つけたときの快感は格別です。</p>
+        <p class="feature-desc-en">The joy is in reading ahead — not brute force. Finding the shortest solution is deeply satisfying.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <p class="feature-title-ja">めくり終えると、一枚の絵になる</p>
+        <p class="feature-title-en">Reveal a Masterpiece</p>
+        <p class="feature-desc-ja">すべてのパネルを表に返すと、隠されていた名画が現れます。達成感と高揚が同時に訪れる瞬間です。</p>
+        <p class="feature-desc-en">Solve the puzzle to unveil a hidden masterpiece. The moment of completion is unlike anything else.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="gallery-section">
+    <div class="gallery-box">
+      <p class="gallery-number">100</p>
+      <p class="gallery-label-ja">世界の名画 100点を収録</p>
+      <p class="gallery-label-en">Masterpieces from around the world — each with artwork commentary</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://apps.apple.com/jp/app/cascadecanvas-%E9%80%A3%E9%8E%96%E3%82%81%E3%81%8F%E3%82%8A%E3%83%91%E3%82%BA%E3%83%AB/id6794664453" target="_blank" rel="noopener">App Store</a>
+        <a href="/privacy.html">プライバシーポリシー / Privacy Policy</a>
+      </div>
+      <p class="copyright">&copy; 2025 Keita Higashi. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
