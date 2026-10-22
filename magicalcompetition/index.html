@@ -183,6 +183,24 @@
     .example .op { color: var(--gold-light); font-family: var(--serif); font-size: 1.2rem; font-weight: 700; }
     .example .tag { display: block; text-align: center; font-size: 0.66rem; color: var(--gold-light); margin-top: 4px; letter-spacing: 0.08em; }
     .play p { font-size: 0.9rem; color: var(--ink); }
+    .turn {
+      margin-top: 28px; padding: 24px 24px 20px; border-radius: 14px;
+      background: #f7efdc; border: 1px solid var(--parchment-deep);
+    }
+    .turn h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
+    .turn ol { padding-left: 1.4em; display: grid; gap: 8px; font-size: 0.92rem; }
+    .turn-note { margin-top: 12px; font-size: 0.85rem; color: var(--ink-sub); }
+
+    /* ── Story ── */
+    .story { background: var(--night); }
+    .tale {
+      max-width: 40em; margin: 0 auto; text-align: center;
+      font-family: var(--serif-ja); font-size: 1.02rem; line-height: 2.1; color: #e3dcef;
+    }
+    .tale p + p { margin-top: 1.1em; }
+    .tale .voice { color: var(--gold-light); font-size: 1.1rem; }
+    .story .section-label, .story .section-title { text-align: center; }
+
     .win {
       margin-top: 28px; padding: 20px 22px; border-radius: 12px;
       background: #f7efdc; border-left: 4px solid var(--gold);
@@ -195,7 +213,8 @@
     .stones { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 18px; }
     .stones figure { text-align: center; }
     .stones img { width: 100%; height: auto; aspect-ratio: 300 / 418; border-radius: 10px; box-shadow: 0 10px 26px rgba(0,0,0,0.45); }
-    .stones figcaption { margin-top: 8px; font-size: 0.85rem; color: var(--text-sub); }
+    .stones figcaption { margin-top: 8px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.4; }
+    .stones figcaption small { display: block; font-size: 0.72em; opacity: 0.8; }
     .note { font-size: 0.85rem; color: var(--text-sub); }
 
     .grimoires-head { margin-top: 72px; }
@@ -214,6 +233,7 @@
     .grimoire .reading { display: block; font-size: 0.7rem; color: var(--text-sub); letter-spacing: 0.06em; margin-bottom: 6px; }
     .grimoire .when { display: block; font-size: 0.72rem; color: #e98b80; font-weight: 700; }
     .grimoire p { font-size: 0.84rem; color: #d8d1e6; line-height: 1.65; }
+    .grimoire .flavor { margin-top: 6px; font-family: var(--serif-ja); font-size: 0.76rem; color: var(--text-sub); line-height: 1.6; }
 
     /* ── Get ── */
     .get { background: var(--night-deep); }
@@ -268,6 +288,7 @@
       <a class="crumb" href="../">Keita Higashi</a><span class="crumb-sep" aria-hidden="true">/</span>
       <a class="brand" href="#top"><img src="assets/icon-180.png" alt="" width="32" height="32"><span><span class="ja">マジカル・コンペ</span><span class="en">Magical Competition</span></span></a>
       <nav class="nav">
+        <a href="#story"><span class="ja">物語</span><span class="en">Story</span></a>
         <a href="#rules"><span class="ja">遊び方</span><span class="en">How to play</span></a>
         <a href="#cards"><span class="ja">カード</span><span class="en">Cards</span></a>
         <a href="#get"><span class="ja">購入・プレイ</span><span class="en">Get it</span></a>
@@ -316,6 +337,21 @@
       <div class="stat"><b>¥2,000</b><span><span class="ja">紙のカード版</span><span class="en">Physical edition</span></span></div>
     </div>
 
+    <!-- 物語 -->
+    <section class="section story" id="story">
+      <div class="wrap">
+        <p class="section-label">Story</p>
+        <h2 class="section-title"><span class="ja">誰が一番、マナを扱うのがうまいのか</span><span class="en">Who handles mana best?</span></h2>
+        <div class="tale">
+          <p><span class="ja">ある日あるところで、会議のために集まった一流の魔法使いたち。そこへ営業に来ていた魔石屋が問いかけた。</span><span class="en">One day, somewhere, the finest wizards gathered for a council. A magic-stone merchant, there to make a sale, asked them:</span></p>
+          <p class="voice"><span class="ja">「この中で、誰が一番マナを扱うのがうまいんだ？」</span><span class="en">“Which of you handles mana best?”</span></p>
+          <p><span class="ja">俺だ。私だ。いいやワシじゃ！ 喧々諤々の会議に、魔石屋は提案する。</span><span class="en">Me. No, me. Nonsense — me! As the council erupted, the merchant made a proposal.</span></p>
+          <p class="voice"><span class="ja">「魔石を使ってゲームをして、マナの扱いを競ってみてはどうだろう？」</span><span class="en">“Why not play a game with magic stones and settle it?”</span></p>
+          <p><span class="ja">残った魔石は、勝ったやつが報酬としてもらっていく——。魔法使いたちは魔石屋から魔石を買って、腕まくり。さあ、勝負の始まりだ！</span><span class="en">Whatever stones are left go to the winner as a prize. The wizards bought their stones, rolled up their sleeves — and the contest began!</span></p>
+        </div>
+      </div>
+    </section>
+
     <!-- 遊び方 -->
     <section class="section rules" id="rules">
       <div class="wrap">
@@ -332,7 +368,7 @@
               <span class="op">←</span>
               <div><img src="assets/cards/stone_water.jpg" alt="水の5" width="300" height="418" loading="lazy"><span class="tag">&nbsp;</span></div>
             </div>
-            <p><span class="ja">色が違っても、数字が同じなら出せます。</span><span class="en">Any color works as long as the number matches.</span></p>
+            <p><span class="ja">色が違っても、数字が同じなら出せます。同じ数字なら3枚まで同時に。</span><span class="en">Any color works as long as the number matches — up to 3 cards at once.</span></p>
           </article>
           <article class="play">
             <p class="play-no">II</p>
@@ -342,11 +378,11 @@
               <span class="op">←</span>
               <div><img src="assets/cards/extra_fire.jpg" alt="火の2" width="300" height="418" loading="lazy"><span class="tag">&nbsp;</span></div>
             </div>
-            <p><span class="ja">数字が違っても、同じ色の魔石なら出せます。</span><span class="en">Any number works as long as the stone's color matches.</span></p>
+            <p><span class="ja">数字が違っても、同じ色の魔石なら出せます。同じ色なら3枚まで同時に。</span><span class="en">Any number works as long as the stone's color matches — up to 3 cards at once.</span></p>
           </article>
           <article class="play">
             <p class="play-no">III</p>
-            <h3><span class="ja">足し算・引き算</span><span class="en">Add &amp; subtract</span></h3>
+            <h3><span class="ja">セイム1（足し算・引き算）</span><span class="en">Same 1 (add &amp; subtract)</span></h3>
             <div class="example">
               <div><img class="field" src="assets/cards/stone_fire.jpg" alt="場札：火の5" width="300" height="418" loading="lazy"><span class="tag"><span class="ja">場札</span><span class="en">Field</span></span></div>
               <span class="op">=</span>
@@ -354,13 +390,23 @@
               <span class="op">−</span>
               <div><img src="assets/cards/extra_earth.jpg" alt="土の3" width="300" height="418" loading="lazy"><span class="tag">&nbsp;</span></div>
             </div>
-            <p><span class="ja">2〜3枚を足し引きして場札の数字にすれば、まとめて出せます。一気に手札を減らすチャンス。</span><span class="en">Add or subtract 2–3 cards to hit the field number and play them all at once — a chance to shed cards fast.</span></p>
+            <p><span class="ja">2〜3枚を足し引きして、答えの<b>一の位</b>が場札の数字と同じなら、まとめて出せます。色は関係なし。場が3なら、9−6＝3 も 9＋6−2＝13 もOK。計算の途中でマイナスになってはいけません。</span><span class="en">Add or subtract 2–3 cards; if the <b>last digit</b> of the result matches the field number, play them all. Color doesn't matter. With a 3 on the field, both 9−6=3 and 9+6−2=13 work. No negative numbers along the way.</span></p>
           </article>
         </div>
 
+        <div class="turn">
+          <h3 class="serif-ja"><span class="ja">手番の流れ</span><span class="en">On your turn</span></h3>
+          <ol>
+            <li><span class="ja"><b>カードを出す</b>（一度に最大3枚）。出せないときはパスを宣言し、手札を好きな枚数だけ山札の一番下に戻します。全員が続けてパスしたら、場札はリセット。</span><span class="en"><b>Play cards</b> (up to 3 at once). If you can't, declare a pass and put any number of cards from your hand on the bottom of your deck. If everyone passes in a row, the field is cleared.</span></li>
+            <li><span class="ja"><b>手札を補充</b>：3枚になるまで自分の山札から引きます。</span><span class="en"><b>Refill</b> your hand to 3 cards from your own deck.</span></li>
+            <li><span class="ja"><b>次の人へ</b>：時計回りに手番が移ります。</span><span class="en"><b>Pass the turn</b> clockwise.</span></li>
+          </ol>
+          <p class="turn-note"><span class="ja">最初は場札がないので、好きな色の「5」があるものとして始めます。</span><span class="en">At the start there is no field card — treat it as a 5 of any color you like.</span></p>
+        </div>
+
         <p class="win">
-          <span class="ja"><b>勝利条件：</b>手札と山札をすべて使い切ったプレイヤーの勝ち。ほかのプレイヤーに残ったカードの枚数が、勝者のポイントになります。</span>
-          <span class="en"><b>To win:</b> be the first to use up your hand and your deck. The cards left in your opponents' hands become your points.</span>
+          <span class="ja"><b>勝利条件：</b>山札と手札をすべて使い切ったプレイヤーがそのゲームの勝者。ほかのプレイヤーに残ったカード（手札＋山札）の枚数が、勝者のポイントになります。何ゲームか遊び、<b>合計20点</b>に届いた人が最終的な勝者です。</span>
+          <span class="en"><b>To win:</b> the first player to use up both their deck and hand wins the game, scoring one point for every card (hand + deck) the others still hold. Play several games — the first to reach <b>20 points</b> is the overall winner.</span>
         </p>
       </div>
     </section>
@@ -372,79 +418,86 @@
         <h2 class="section-title"><span class="ja">5色の魔石カード</span><span class="en">Magic stones in five colors</span></h2>
         <p class="section-lead"><span class="ja">火・水・光・土・風の5色 × 数字1〜9、全45枚。</span><span class="en">Fire, Water, Light, Earth and Wind, numbered 1 to 9 — 45 cards in all.</span></p>
         <div class="stones">
-          <figure><img src="assets/cards/stone_fire.jpg" alt="火の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">火</span><span class="en">Fire</span></figcaption></figure>
-          <figure><img src="assets/cards/stone_water.jpg" alt="水の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">水</span><span class="en">Water</span></figcaption></figure>
-          <figure><img src="assets/cards/stone_light.jpg" alt="光の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">光</span><span class="en">Light</span></figcaption></figure>
-          <figure><img src="assets/cards/stone_earth.jpg" alt="土の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">土</span><span class="en">Earth</span></figcaption></figure>
-          <figure><img src="assets/cards/stone_wind.jpg" alt="風の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">風</span><span class="en">Wind</span></figcaption></figure>
+          <figure><img src="assets/cards/stone_fire.jpg" alt="火の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">火<small>正四面体</small></span><span class="en">Fire<small>tetrahedron</small></span></figcaption></figure>
+          <figure><img src="assets/cards/stone_water.jpg" alt="水の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">水<small>正二十面体</small></span><span class="en">Water<small>icosahedron</small></span></figcaption></figure>
+          <figure><img src="assets/cards/stone_light.jpg" alt="光の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">光<small>球</small></span><span class="en">Light<small>sphere</small></span></figcaption></figure>
+          <figure><img src="assets/cards/stone_earth.jpg" alt="土の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">土<small>正六面体</small></span><span class="en">Earth<small>cube</small></span></figcaption></figure>
+          <figure><img src="assets/cards/stone_wind.jpg" alt="風の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">風<small>正八面体</small></span><span class="en">Wind<small>octahedron</small></span></figcaption></figure>
         </div>
 
         <div class="grimoires-head">
           <h2 class="section-title"><span class="ja">一発逆転の魔法カード</span><span class="en">Magic cards for a comeback</span><span class="badge"><span class="ja">紙のカード版のみ</span><span class="en">Physical only</span></span></h2>
-          <p class="section-lead"><span class="ja">7種類の魔導書。使いどころを見極めれば、劣勢からでも勝負をひっくり返せます。</span><span class="en">Seven grimoires. Cast one at the right moment and you can turn the game around.</span></p>
+          <p class="section-lead"><span class="ja">7種類の魔導書。ゲームの準備で1人1枚ずつ選び、使えるのはカードに書かれたタイミングで1回だけ。使いどころを見極めれば、劣勢からでも勝負をひっくり返せます。</span><span class="en">Seven grimoires. Each player picks one during setup and may cast it only once, at the timing written on the card. Choose the moment well and you can turn the game around.</span></p>
         </div>
         <div class="grimoires">
           <div class="grimoire">
             <img src="assets/cards/grimoire_yellow.jpg" alt="" width="300" height="418" loading="lazy">
             <div>
               <h4><span class="ja">等価交換</span><span class="en">Ex-Change</span></h4>
-              <span class="reading"><span class="ja">エクス・チェンジ</span><span class="en">Equivalent Exchange</span></span>
+              <span class="reading"><span class="ja">エクス・チェンジ</span><span class="en">等価交換</span></span>
               <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
               <p><span class="ja">山札から2枚引いて手札に加え、その後で手札から2枚を山札の下に入れる。</span><span class="en">Draw 2 cards from your deck, then put 2 cards from your hand on the bottom of the deck.</span></p>
+              <p class="flavor"><span class="ja">何かを得るためには同等の価値を持つ何かを差し出さねばならない</span><span class="en">To gain something, one must offer something of equal value.</span></p>
             </div>
           </div>
           <div class="grimoire">
             <img src="assets/cards/grimoire_black.jpg" alt="" width="300" height="418" loading="lazy">
             <div>
-              <h4><span class="ja">双手合術</span><span class="en">Twin Sorcery</span></h4>
-              <span class="reading"><span class="ja">ツイン・ソーサル</span><span class="en">Two Hands as One</span></span>
-              <span class="when"><span class="ja">カードを場に出す前に使用</span><span class="en">Before you play a card</span></span>
+              <h4><span class="ja">双手合術</span><span class="en">Twin Sorcel</span></h4>
+              <span class="reading"><span class="ja">ツイン・ソーサル</span><span class="en">双手合術</span></span>
+              <span class="when"><span class="ja">カードを場に出す前に使用</span><span class="en">Before you play cards</span></span>
               <p><span class="ja">札に関係なく2枚出せる。</span><span class="en">Play 2 cards regardless of the field card.</span></p>
+              <p class="flavor"><span class="ja">「双掌の魔力、二を一に。全を一に。万象を纏め、一の色彩を描き出せ。」</span><span class="en">“Power of twin palms — two into one, all into one. Gather all things and paint a single color.”</span></p>
             </div>
           </div>
           <div class="grimoire">
             <img src="assets/cards/grimoire_red.jpg" alt="" width="300" height="418" loading="lazy">
             <div>
               <h4><span class="ja">加速瞬動</span><span class="en">Quick Accel</span></h4>
-              <span class="reading"><span class="ja">クイック・アクセル</span><span class="en">Swift Acceleration</span></span>
+              <span class="reading"><span class="ja">クイック・アクセル</span><span class="en">加速瞬動</span></span>
               <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
               <p><span class="ja">ターン終了時に、もう一回自分のターンになる。</span><span class="en">When your turn ends, take another turn.</span></p>
+              <p class="flavor"><span class="ja">「一つの瞬きの間に、二つの手を。刹那の刻、疾風の如き力を、汝に。」</span><span class="en">“Two moves in a single blink. In this fleeting instant, the speed of the gale be yours.”</span></p>
             </div>
           </div>
           <div class="grimoire">
             <img src="assets/cards/grimoire_purple.jpg" alt="" width="300" height="418" loading="lazy">
             <div>
               <h4><span class="ja">魔封呪縛</span><span class="en">Cursed Add</span></h4>
-              <span class="reading"><span class="ja">カースド・アッド</span><span class="en">Sealing Curse</span></span>
+              <span class="reading"><span class="ja">カースド・アッド</span><span class="en">魔封呪縛</span></span>
               <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
               <p><span class="ja">指定されたプレイヤーは、既に出されている魔石カードの底から2枚を山札の上に加える。</span><span class="en">The chosen player takes the bottom 2 magic stones already played and adds them to the top of their deck.</span></p>
+              <p class="flavor"><span class="ja">「妬み嫉みの淵より出でし黒き腕よ、生者の足を掴み、闇に誘え。」</span><span class="en">“Black arms risen from the depths of envy — seize the feet of the living and drag them into darkness.”</span></p>
             </div>
           </div>
           <div class="grimoire">
             <img src="assets/cards/grimoire_blue.jpg" alt="" width="300" height="418" loading="lazy">
             <div>
               <h4><span class="ja">時間の凍結</span><span class="en">Act Stack</span></h4>
-              <span class="reading"><span class="ja">アクト・スタック</span><span class="en">Frozen Time</span></span>
+              <span class="reading"><span class="ja">アクト・スタック</span><span class="en">時間の凍結</span></span>
               <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
               <p><span class="ja">指定されたプレイヤーは、次のターンをスキップする。</span><span class="en">The chosen player skips their next turn.</span></p>
+              <p class="flavor"><span class="ja">時は美しき流砂。其の呪文は、硝子のくびれを遮るように、流砂を波なき砂海に変える。</span><span class="en">Time is beautiful flowing sand. This spell blocks the hourglass’s waist and stills it into a waveless sea.</span></p>
             </div>
           </div>
           <div class="grimoire">
             <img src="assets/cards/grimoire_green.jpg" alt="" width="300" height="418" loading="lazy">
             <div>
               <h4><span class="ja">運命の転送</span><span class="en">Hand Over</span></h4>
-              <span class="reading"><span class="ja">ハンド・オーバー</span><span class="en">Transfer of Fate</span></span>
+              <span class="reading"><span class="ja">ハンド・オーバー</span><span class="en">運命の転送</span></span>
               <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
               <p><span class="ja">手札から1枚選んで、指定されたプレイヤーに渡す。</span><span class="en">Choose 1 card from your hand and give it to the chosen player.</span></p>
+              <p class="flavor"><span class="ja">運命の糸を編み直し、自らの未来を他者に託す</span><span class="en">Reweave the threads of fate, and entrust your future to another.</span></p>
             </div>
           </div>
           <div class="grimoire">
             <img src="assets/cards/grimoire_white.jpg" alt="" width="300" height="418" loading="lazy">
             <div>
               <h4><span class="ja">清廉潔白</span><span class="en">Pure Reward</span></h4>
-              <span class="reading"><span class="ja">ピュア・リワード</span><span class="en">Clean Hands</span></span>
+              <span class="reading"><span class="ja">ピュア・リワード</span><span class="en">清廉潔白</span></span>
               <span class="when"><span class="ja">ゲーム終了時</span><span class="en">At the end of the game</span></span>
               <p><span class="ja">勝利していたら、ポイント＋5。</span><span class="en">If you won, gain +5 points.</span></p>
+              <p class="flavor"><span class="ja">闇の一片も宿さない輝く魂の如し。真実と誠実の盾を持ち、嘘偽りの影を一切纏わぬ者。</span><span class="en">Like a radiant soul without a shard of darkness — one who bears the shield of truth and wears no shadow of deceit.</span></p>
             </div>
           </div>
         </div>
@@ -466,6 +519,7 @@
               <dt><span class="ja">人数</span><span class="en">Players</span></dt><dd><span class="ja">2〜5人</span><span class="en">2–5</span></dd>
               <dt><span class="ja">時間</span><span class="en">Time</span></dt><dd><span class="ja">約15分</span><span class="en">About 15 minutes</span></dd>
               <dt><span class="ja">年齢</span><span class="en">Ages</span></dt><dd><span class="ja">8才以上</span><span class="en">8 and up</span></dd>
+              <dt><span class="ja">内容</span><span class="en">Contents</span></dt><dd><span class="ja">計54枚（魔石カード45枚・魔法カード7枚・魔法リスト1枚・説明書1枚）</span><span class="en">54 pieces: 45 magic stones, 7 magic cards, 1 spell list, 1 rulebook</span></dd>
               <dt><span class="ja">発送</span><span class="en">Shipping</span></dt><dd><span class="ja">支払いから7日以内に発送</span><span class="en">Ships within 7 days of payment</span></dd>
             </dl>
             <a class="btn btn-gold" href="https://cardgr.booth.pm/items/8283933" target="_blank" rel="noopener"><span class="ja">BOOTH で購入</span><span class="en">Buy on BOOTH</span></a>
