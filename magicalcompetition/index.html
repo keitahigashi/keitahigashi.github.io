@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ja" data-lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マジカル・コンペ — 魔石カードの計算バトル</title>
+  <meta name="description" content="マジカル・コンペは、2〜5人で遊べる戦略カードゲーム。同じ色・同じ数字、足し算・引き算で場札に合わせ、誰よりも早く手札を使い切れ。一人用デジタル版は unityroom で無料公開中。">
+  <meta name="theme-color" content="#1c1233">
+  <link rel="canonical" href="https://keitahigashi.github.io/magicalcompetition/">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icon-180.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Keita Higashi">
+  <meta property="og:title" content="マジカル・コンペ / Magical Competition">
+  <meta property="og:description" content="魔石カードを組み合わせて、誰よりも早く手札を使い切れ！ 2〜5人の戦略カードゲーム。Combine magic-stone cards and be the first to empty your hand.">
+  <meta property="og:url" content="https://keitahigashi.github.io/magicalcompetition/">
+  <meta property="og:image" content="https://keitahigashi.github.io/magicalcompetition/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Shippori+Mincho:wght@500;600;700&display=swap">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --night: #1c1233;
+      --night-deep: #120b22;
+      --night-card: #26183f;
+      --line: rgba(226, 190, 110, 0.18);
+      --gold: #d4af5a;
+      --gold-light: #ecd08a;
+      --parchment: #efe4cc;
+      --parchment-deep: #e2d2b0;
+      --ink: #3a2414;
+      --ink-sub: #6e5640;
+      --text: #ede6f5;
+      --text-sub: #b3a8c9;
+      --fire: #c8352b;
+      --serif: 'Cinzel', 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      --serif-ja: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      --sans: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', 'Segoe UI', sans-serif;
+      --wrap: 1080px;
+    }
+
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      background: var(--night-deep);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; }
+
+    /* ── 言語切替：表示中の言語以外を隠す ── */
+    html[data-lang="ja"] .en,
+    html[data-lang="en"] .ja { display: none !important; }
+    .serif-ja { font-family: var(--serif-ja); }
+
+    .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 20px; }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(18, 11, 34, 0.86);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .site-header .wrap { display: flex; align-items: center; gap: 16px; height: 60px; }
+    .crumb { font-size: 0.8rem; letter-spacing: 0.08em; color: var(--text-sub); text-decoration: none; white-space: nowrap; }
+    .crumb:hover { color: var(--gold-light); }
+    .crumb-sep { color: var(--line); margin: 0 -6px; }
+    @media (max-width: 480px) { .crumb, .crumb-sep { display: none; } }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; min-width: 0; }
+    .brand img { width: 32px; height: 32px; border-radius: 8px; }
+    .brand span { font-family: var(--serif-ja); font-size: 1.1rem; font-weight: 700; letter-spacing: 0.06em; color: var(--gold-light); white-space: nowrap; }
+    .nav { display: flex; gap: 20px; }
+    .nav a { text-decoration: none; font-size: 0.85rem; color: var(--text-sub); transition: color .2s; }
+    .nav a:hover { color: var(--gold-light); }
+    .lang-switch { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+    .lang-switch button {
+      background: none; border: 0; color: var(--text-sub);
+      font: 600 0.75rem var(--sans); letter-spacing: 0.08em;
+      padding: 6px 12px; cursor: pointer; min-height: 32px;
+    }
+    .lang-switch button[aria-pressed="true"] { background: var(--gold); color: var(--night-deep); }
+    @media (max-width: 760px) { .nav { display: none; } }
+
+    /* ── Hero ── */
+    .hero {
+      background:
+        linear-gradient(180deg, rgba(28,18,51,0.55) 0%, rgba(18,11,34,0.88) 75%, var(--night-deep) 100%),
+        url("assets/bg.jpg") center / cover no-repeat;
+      overflow: hidden;
+    }
+    .hero .wrap {
+      display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 40px; align-items: center;
+      padding-top: 72px; padding-bottom: 88px;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 12px;
+      font-size: 0.8rem; letter-spacing: 0.2em; color: var(--gold-light);
+      margin-bottom: 18px;
+    }
+    .eyebrow::before { content: ""; width: 40px; height: 2px; background: var(--gold); }
+    .hero h1 {
+      font-family: var(--serif-ja); font-weight: 700;
+      font-size: clamp(2.4rem, 6vw, 3.8rem); line-height: 1.2; letter-spacing: 0.04em;
+      color: #fff6dc; text-shadow: 0 4px 24px rgba(212,175,90,0.35);
+    }
+    .hero .title-en {
+      font-family: var(--serif); font-size: clamp(0.95rem, 2.2vw, 1.2rem);
+      letter-spacing: 0.28em; color: var(--gold); margin: 8px 0 24px;
+    }
+    .hero .catch { font-family: var(--serif-ja); font-size: clamp(1.15rem, 2.8vw, 1.45rem); font-weight: 600; margin-bottom: 12px; word-break: keep-all; overflow-wrap: anywhere; }
+    .hero .lead { color: #d3cbe3; font-size: 0.98rem; max-width: 34em; margin-bottom: 30px; }
+    .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      text-decoration: none; font-weight: 700; letter-spacing: 0.04em; font-size: 0.95rem;
+      padding: 13px 26px; border-radius: 999px; min-height: 48px;
+      transition: background .2s, transform .15s, border-color .2s, color .2s;
+    }
+    .btn-gold { background: var(--gold); color: var(--night-deep); box-shadow: 0 10px 30px rgba(212,175,90,0.25); }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-ghost { border: 1px solid var(--gold); color: var(--gold-light); }
+    .btn-ghost:hover { background: rgba(212,175,90,0.12); }
+    .btn small { font-weight: 500; font-size: 0.75rem; opacity: 0.8; }
+
+    .fan { position: relative; height: 380px; max-width: 420px; width: 100%; margin: 0 auto; }
+    .fan img {
+      position: absolute; left: 50%; top: 50%;
+      width: 190px; height: auto; aspect-ratio: 300 / 418;
+      border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+      transform-origin: 50% 120%;
+    }
+    .fan img:nth-child(1) { transform: translate(-50%, -50%) rotate(-16deg) translateX(-34px); }
+    .fan img:nth-child(2) { transform: translate(-50%, -50%) rotate(0deg) translateY(-14px); z-index: 1; }
+    .fan img:nth-child(3) { transform: translate(-50%, -50%) rotate(16deg) translateX(34px); }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      background: var(--night-deep);
+    }
+    .stat { text-align: center; padding: 22px 8px; }
+    .stat + .stat { border-left: 1px solid var(--line); }
+    .stat b { display: block; font-family: var(--serif-ja); font-size: clamp(1.5rem, 3.6vw, 2.1rem); font-weight: 700; color: var(--gold-light); line-height: 1.2; }
+    .stat span { font-size: 0.8rem; color: var(--text-sub); }
+
+    /* ── Section common ── */
+    section { scroll-margin-top: 64px; }
+    .section { padding: 88px 0; }
+    .section-label { font-family: var(--serif); font-size: 0.78rem; letter-spacing: 0.28em; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+    .section-title { font-family: var(--serif-ja); font-size: clamp(1.6rem, 3.6vw, 2.3rem); font-weight: 700; line-height: 1.4; margin-bottom: 16px; word-break: keep-all; overflow-wrap: anywhere; }
+    .section-lead { color: var(--text-sub); max-width: 40em; margin-bottom: 48px; }
+
+    /* ── How to play（羊皮紙） ── */
+    .rules { background: var(--parchment); color: var(--ink); }
+    .rules .section-label { color: #9a6f2a; }
+    .rules .section-lead { color: var(--ink-sub); }
+    .plays { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .play {
+      background: #f7efdc; border: 1px solid var(--parchment-deep); border-radius: 14px;
+      padding: 24px 20px 22px;
+    }
+    .play-no { font-family: var(--serif); font-size: 0.75rem; letter-spacing: 0.2em; color: #9a6f2a; margin-bottom: 4px; }
+    .play h3 { font-family: var(--serif-ja); font-size: 1.2rem; font-weight: 700; margin-bottom: 14px; }
+    .example {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #3a2a52; border-radius: 10px; padding: 14px 10px; margin-bottom: 14px;
+      min-height: 132px;
+    }
+    .example img { width: 64px; height: auto; aspect-ratio: 300 / 418; border-radius: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    .example .field { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+    .example .op { color: var(--gold-light); font-family: var(--serif); font-size: 1.2rem; font-weight: 700; }
+    .example .tag { display: block; text-align: center; font-size: 0.66rem; color: var(--gold-light); margin-top: 4px; letter-spacing: 0.08em; }
+    .play p { font-size: 0.9rem; color: var(--ink); }
+    .win {
+      margin-top: 28px; padding: 20px 22px; border-radius: 12px;
+      background: #f7efdc; border-left: 4px solid var(--gold);
+      font-size: 0.95rem;
+    }
+    .win b { font-family: var(--serif-ja); }
+
+    /* ── Cards ── */
+    .cards { background: var(--night); }
+    .stones { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 18px; }
+    .stones figure { text-align: center; }
+    .stones img { width: 100%; height: auto; aspect-ratio: 300 / 418; border-radius: 10px; box-shadow: 0 10px 26px rgba(0,0,0,0.45); }
+    .stones figcaption { margin-top: 8px; font-size: 0.85rem; color: var(--text-sub); }
+    .note { font-size: 0.85rem; color: var(--text-sub); }
+
+    .grimoires-head { margin-top: 72px; }
+    .badge {
+      display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      padding: 2px 10px; border-radius: 999px; border: 1px solid var(--gold); color: var(--gold-light);
+      vertical-align: middle; margin-left: 8px;
+    }
+    .grimoires { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+    .grimoire {
+      display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: start;
+      background: var(--night-card); border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+    }
+    .grimoire img { width: 76px; height: auto; aspect-ratio: 300 / 418; border-radius: 6px; }
+    .grimoire h4 { font-family: var(--serif-ja); font-size: 1rem; font-weight: 700; color: var(--gold-light); line-height: 1.4; }
+    .grimoire .reading { display: block; font-size: 0.7rem; color: var(--text-sub); letter-spacing: 0.06em; margin-bottom: 6px; }
+    .grimoire .when { display: block; font-size: 0.72rem; color: #e98b80; font-weight: 700; }
+    .grimoire p { font-size: 0.84rem; color: #d8d1e6; line-height: 1.65; }
+
+    /* ── Get ── */
+    .get { background: var(--night-deep); }
+    .editions { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .edition {
+      background: var(--night-card); border: 1px solid var(--line); border-radius: 16px;
+      padding: 30px 26px; display: flex; flex-direction: column;
+    }
+    .edition-kind { font-size: 0.75rem; letter-spacing: 0.16em; color: var(--gold); margin-bottom: 6px; }
+    .edition h3 { font-family: var(--serif-ja); font-size: 1.35rem; font-weight: 700; margin-bottom: 14px; }
+    .edition dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: 0.9rem; margin-bottom: 24px; }
+    .edition dt { color: var(--text-sub); white-space: nowrap; }
+    .edition .btn { margin-top: auto; align-self: flex-start; }
+
+    footer { border-top: 1px solid var(--line); padding: 28px 0 36px; background: var(--night-deep); }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; align-items: center; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+    .footer-links a { text-decoration: none; font-size: 0.82rem; color: var(--text-sub); }
+    .footer-links a:hover { color: var(--gold-light); }
+    .copyright { font-size: 0.78rem; color: var(--text-sub); }
+
+    /* ── Responsive ── */
+    @media (max-width: 880px) {
+      .hero .wrap { grid-template-columns: 1fr; gap: 24px; padding-top: 48px; padding-bottom: 56px; text-align: center; }
+      .hero .lead { margin-left: auto; margin-right: auto; }
+      .eyebrow, .cta { justify-content: center; }
+      .fan { height: 320px; }
+      .fan img { width: 160px; }
+      .plays, .editions { grid-template-columns: 1fr; }
+      .section { padding: 64px 0; }
+    }
+    @media (max-width: 560px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(3) { border-left: 0; }
+      .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+      .stones { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+      .stones figcaption { font-size: 0.72rem; }
+      .fan { height: 280px; }
+      .fan img { width: 136px; }
+      .edition { padding: 24px 20px; }
+      .cta .btn { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a class="crumb" href="../">Keita Higashi</a><span class="crumb-sep" aria-hidden="true">/</span>
+      <a class="brand" href="#top"><img src="assets/icon-180.png" alt="" width="32" height="32"><span><span class="ja">マジカル・コンペ</span><span class="en">Magical Competition</span></span></a>
+      <nav class="nav">
+        <a href="#rules"><span class="ja">遊び方</span><span class="en">How to play</span></a>
+        <a href="#cards"><span class="ja">カード</span><span class="en">Cards</span></a>
+        <a href="#get"><span class="ja">購入・プレイ</span><span class="en">Get it</span></a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="ja" aria-pressed="true">JA</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ヒーロー -->
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <p class="eyebrow"><span class="ja">戦略カードゲーム</span><span class="en">A strategy card game</span></p>
+          <h1>マジカル・コンペ</h1>
+          <p class="title-en">MAGICAL COMPETITION</p>
+          <p class="catch">
+            <span class="ja">魔石カードを組み合わせて、<wbr>誰よりも早く<wbr>手札を使い切れ！</span>
+            <span class="en">Combine magic stones. Be the first to empty your hand!</span>
+          </p>
+          <p class="lead">
+            <span class="ja">場札と同じ色・同じ数字のカードを出したり、数字を足し算・引き算して条件を満たしたりしながら手札を減らす、テンポのよい対戦ゲーム。魔法カードを使えば一発逆転も。</span>
+            <span class="en">Match the field card by color or number — or add and subtract cards to hit its value — and race to shed your hand. Cast a magic card for a sudden turnaround.</span>
+          </p>
+          <div class="cta">
+            <a class="btn btn-gold" href="https://cardgr.booth.pm/items/8283933" target="_blank" rel="noopener"><span class="ja">BOOTH で購入</span><span class="en">Buy on BOOTH</span></a>
+            <a class="btn btn-ghost" href="https://unityroom.com/games/magicalcompetition" target="_blank" rel="noopener"><span class="ja">一人用を無料で遊ぶ</span><span class="en">Play solo free</span> <small>unityroom</small></a>
+          </div>
+        </div>
+        <div class="fan" aria-hidden="true">
+          <img src="assets/cards/stone_fire.jpg" alt="" width="300" height="418">
+          <img src="assets/cards/grimoire_yellow.jpg" alt="" width="300" height="418">
+          <img src="assets/cards/stone_water.jpg" alt="" width="300" height="418">
+        </div>
+      </div>
+    </section>
+
+    <div class="stats">
+      <div class="stat"><b><span class="ja">2〜5人</span><span class="en">2–5</span></b><span><span class="ja">プレイ人数</span><span class="en">Players</span></span></div>
+      <div class="stat"><b><span class="ja">約15分</span><span class="en">~15 min</span></b><span><span class="ja">プレイ時間</span><span class="en">Play time</span></span></div>
+      <div class="stat"><b><span class="ja">8才〜</span><span class="en">8+</span></b><span><span class="ja">対象年齢</span><span class="en">Ages</span></span></div>
+      <div class="stat"><b>¥2,000</b><span><span class="ja">紙のカード版</span><span class="en">Physical edition</span></span></div>
+    </div>
+
+    <!-- 遊び方 -->
+    <section class="section rules" id="rules">
+      <div class="wrap">
+        <p class="section-label">How to play</p>
+        <h2 class="section-title"><span class="ja">場札に出せるのは、3通り</span><span class="en">Three ways to play on the field</span></h2>
+        <p class="section-lead"><span class="ja">場に出ているカード（場札）に合うカードを手札から出していきます。シンプルなルールなのに、手札の管理と出す順番が勝敗を分けます。</span><span class="en">Play cards from your hand that fit the card on the field. The rules are simple — but how you manage your hand and the order you play decide the winner.</span></p>
+
+        <div class="plays">
+          <article class="play">
+            <p class="play-no">I</p>
+            <h3><span class="ja">同じ数字</span><span class="en">Same number</span></h3>
+            <div class="example">
+              <div><img class="field" src="assets/cards/stone_fire.jpg" alt="場札：火の5" width="300" height="418" loading="lazy"><span class="tag"><span class="ja">場札</span><span class="en">Field</span></span></div>
+              <span class="op">←</span>
+              <div><img src="assets/cards/stone_water.jpg" alt="水の5" width="300" height="418" loading="lazy"><span class="tag">&nbsp;</span></div>
+            </div>
+            <p><span class="ja">色が違っても、数字が同じなら出せます。</span><span class="en">Any color works as long as the number matches.</span></p>
+          </article>
+          <article class="play">
+            <p class="play-no">II</p>
+            <h3><span class="ja">同じ色</span><span class="en">Same color</span></h3>
+            <div class="example">
+              <div><img class="field" src="assets/cards/stone_fire.jpg" alt="場札：火の5" width="300" height="418" loading="lazy"><span class="tag"><span class="ja">場札</span><span class="en">Field</span></span></div>
+              <span class="op">←</span>
+              <div><img src="assets/cards/extra_fire.jpg" alt="火の2" width="300" height="418" loading="lazy"><span class="tag">&nbsp;</span></div>
+            </div>
+            <p><span class="ja">数字が違っても、同じ色の魔石なら出せます。</span><span class="en">Any number works as long as the stone's color matches.</span></p>
+          </article>
+          <article class="play">
+            <p class="play-no">III</p>
+            <h3><span class="ja">足し算・引き算</span><span class="en">Add &amp; subtract</span></h3>
+            <div class="example">
+              <div><img class="field" src="assets/cards/stone_fire.jpg" alt="場札：火の5" width="300" height="418" loading="lazy"><span class="tag"><span class="ja">場札</span><span class="en">Field</span></span></div>
+              <span class="op">=</span>
+              <div><img src="assets/cards/extra_water.jpg" alt="水の8" width="300" height="418" loading="lazy"><span class="tag">&nbsp;</span></div>
+              <span class="op">−</span>
+              <div><img src="assets/cards/extra_earth.jpg" alt="土の3" width="300" height="418" loading="lazy"><span class="tag">&nbsp;</span></div>
+            </div>
+            <p><span class="ja">2〜3枚を足し引きして場札の数字にすれば、まとめて出せます。一気に手札を減らすチャンス。</span><span class="en">Add or subtract 2–3 cards to hit the field number and play them all at once — a chance to shed cards fast.</span></p>
+          </article>
+        </div>
+
+        <p class="win">
+          <span class="ja"><b>勝利条件：</b>手札と山札をすべて使い切ったプレイヤーの勝ち。ほかのプレイヤーに残ったカードの枚数が、勝者のポイントになります。</span>
+          <span class="en"><b>To win:</b> be the first to use up your hand and your deck. The cards left in your opponents' hands become your points.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- カード -->
+    <section class="section cards" id="cards">
+      <div class="wrap">
+        <p class="section-label">Cards</p>
+        <h2 class="section-title"><span class="ja">5色の魔石カード</span><span class="en">Magic stones in five colors</span></h2>
+        <p class="section-lead"><span class="ja">火・水・光・土・風の5色 × 数字1〜9、全45枚。</span><span class="en">Fire, Water, Light, Earth and Wind, numbered 1 to 9 — 45 cards in all.</span></p>
+        <div class="stones">
+          <figure><img src="assets/cards/stone_fire.jpg" alt="火の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">火</span><span class="en">Fire</span></figcaption></figure>
+          <figure><img src="assets/cards/stone_water.jpg" alt="水の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">水</span><span class="en">Water</span></figcaption></figure>
+          <figure><img src="assets/cards/stone_light.jpg" alt="光の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">光</span><span class="en">Light</span></figcaption></figure>
+          <figure><img src="assets/cards/stone_earth.jpg" alt="土の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">土</span><span class="en">Earth</span></figcaption></figure>
+          <figure><img src="assets/cards/stone_wind.jpg" alt="風の魔石" width="300" height="418" loading="lazy"><figcaption><span class="ja">風</span><span class="en">Wind</span></figcaption></figure>
+        </div>
+
+        <div class="grimoires-head">
+          <h2 class="section-title"><span class="ja">一発逆転の魔法カード</span><span class="en">Magic cards for a comeback</span><span class="badge"><span class="ja">紙のカード版のみ</span><span class="en">Physical only</span></span></h2>
+          <p class="section-lead"><span class="ja">7種類の魔導書。使いどころを見極めれば、劣勢からでも勝負をひっくり返せます。</span><span class="en">Seven grimoires. Cast one at the right moment and you can turn the game around.</span></p>
+        </div>
+        <div class="grimoires">
+          <div class="grimoire">
+            <img src="assets/cards/grimoire_yellow.jpg" alt="" width="300" height="418" loading="lazy">
+            <div>
+              <h4><span class="ja">等価交換</span><span class="en">Ex-Change</span></h4>
+              <span class="reading"><span class="ja">エクス・チェンジ</span><span class="en">Equivalent Exchange</span></span>
+              <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
+              <p><span class="ja">山札から2枚引いて手札に加え、その後で手札から2枚を山札の下に入れる。</span><span class="en">Draw 2 cards from your deck, then put 2 cards from your hand on the bottom of the deck.</span></p>
+            </div>
+          </div>
+          <div class="grimoire">
+            <img src="assets/cards/grimoire_black.jpg" alt="" width="300" height="418" loading="lazy">
+            <div>
+              <h4><span class="ja">双手合術</span><span class="en">Twin Sorcery</span></h4>
+              <span class="reading"><span class="ja">ツイン・ソーサル</span><span class="en">Two Hands as One</span></span>
+              <span class="when"><span class="ja">カードを場に出す前に使用</span><span class="en">Before you play a card</span></span>
+              <p><span class="ja">札に関係なく2枚出せる。</span><span class="en">Play 2 cards regardless of the field card.</span></p>
+            </div>
+          </div>
+          <div class="grimoire">
+            <img src="assets/cards/grimoire_red.jpg" alt="" width="300" height="418" loading="lazy">
+            <div>
+              <h4><span class="ja">加速瞬動</span><span class="en">Quick Accel</span></h4>
+              <span class="reading"><span class="ja">クイック・アクセル</span><span class="en">Swift Acceleration</span></span>
+              <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
+              <p><span class="ja">ターン終了時に、もう一回自分のターンになる。</span><span class="en">When your turn ends, take another turn.</span></p>
+            </div>
+          </div>
+          <div class="grimoire">
+            <img src="assets/cards/grimoire_purple.jpg" alt="" width="300" height="418" loading="lazy">
+            <div>
+              <h4><span class="ja">魔封呪縛</span><span class="en">Cursed Add</span></h4>
+              <span class="reading"><span class="ja">カースド・アッド</span><span class="en">Sealing Curse</span></span>
+              <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
+              <p><span class="ja">指定されたプレイヤーは、既に出されている魔石カードの底から2枚を山札の上に加える。</span><span class="en">The chosen player takes the bottom 2 magic stones already played and adds them to the top of their deck.</span></p>
+            </div>
+          </div>
+          <div class="grimoire">
+            <img src="assets/cards/grimoire_blue.jpg" alt="" width="300" height="418" loading="lazy">
+            <div>
+              <h4><span class="ja">時間の凍結</span><span class="en">Act Stack</span></h4>
+              <span class="reading"><span class="ja">アクト・スタック</span><span class="en">Frozen Time</span></span>
+              <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
+              <p><span class="ja">指定されたプレイヤーは、次のターンをスキップする。</span><span class="en">The chosen player skips their next turn.</span></p>
+            </div>
+          </div>
+          <div class="grimoire">
+            <img src="assets/cards/grimoire_green.jpg" alt="" width="300" height="418" loading="lazy">
+            <div>
+              <h4><span class="ja">運命の転送</span><span class="en">Hand Over</span></h4>
+              <span class="reading"><span class="ja">ハンド・オーバー</span><span class="en">Transfer of Fate</span></span>
+              <span class="when"><span class="ja">自身のターン開始時に使用</span><span class="en">At the start of your turn</span></span>
+              <p><span class="ja">手札から1枚選んで、指定されたプレイヤーに渡す。</span><span class="en">Choose 1 card from your hand and give it to the chosen player.</span></p>
+            </div>
+          </div>
+          <div class="grimoire">
+            <img src="assets/cards/grimoire_white.jpg" alt="" width="300" height="418" loading="lazy">
+            <div>
+              <h4><span class="ja">清廉潔白</span><span class="en">Pure Reward</span></h4>
+              <span class="reading"><span class="ja">ピュア・リワード</span><span class="en">Clean Hands</span></span>
+              <span class="when"><span class="ja">ゲーム終了時</span><span class="en">At the end of the game</span></span>
+              <p><span class="ja">勝利していたら、ポイント＋5。</span><span class="en">If you won, gain +5 points.</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 購入・プレイ -->
+    <section class="section get" id="get">
+      <div class="wrap">
+        <p class="section-label">Get it</p>
+        <h2 class="section-title"><span class="ja">紙のカードで、みんなで。<wbr>ブラウザで、ひとりで。</span><span class="en">Gather friends with cards, or play solo in your browser</span></h2>
+        <p class="section-lead"><span class="ja">まずは一人用のデジタル版でルールを試してから、紙のカードで対戦するのもおすすめです。</span><span class="en">Try the rules in the free solo version first, then bring the physical cards to the table.</span></p>
+        <div class="editions">
+          <article class="edition">
+            <p class="edition-kind">TABLETOP</p>
+            <h3><span class="ja">紙のカードゲーム</span><span class="en">Physical card game</span></h3>
+            <dl>
+              <dt><span class="ja">価格</span><span class="en">Price</span></dt><dd>¥2,000</dd>
+              <dt><span class="ja">人数</span><span class="en">Players</span></dt><dd><span class="ja">2〜5人</span><span class="en">2–5</span></dd>
+              <dt><span class="ja">時間</span><span class="en">Time</span></dt><dd><span class="ja">約15分</span><span class="en">About 15 minutes</span></dd>
+              <dt><span class="ja">年齢</span><span class="en">Ages</span></dt><dd><span class="ja">8才以上</span><span class="en">8 and up</span></dd>
+              <dt><span class="ja">発送</span><span class="en">Shipping</span></dt><dd><span class="ja">支払いから7日以内に発送</span><span class="en">Ships within 7 days of payment</span></dd>
+            </dl>
+            <a class="btn btn-gold" href="https://cardgr.booth.pm/items/8283933" target="_blank" rel="noopener"><span class="ja">BOOTH で購入</span><span class="en">Buy on BOOTH</span></a>
+          </article>
+          <article class="edition">
+            <p class="edition-kind">DIGITAL · SOLO</p>
+            <h3><span class="ja">一人用デジタル版</span><span class="en">Solo digital edition</span></h3>
+            <dl>
+              <dt><span class="ja">価格</span><span class="en">Price</span></dt><dd><span class="ja">無料</span><span class="en">Free</span></dd>
+              <dt><span class="ja">遊び方</span><span class="en">Mode</span></dt><dd><span class="ja">AI（1〜4体）と対戦</span><span class="en">Play against 1–4 AI opponents</span></dd>
+              <dt><span class="ja">環境</span><span class="en">Platform</span></dt><dd><span class="ja">ブラウザ（unityroom）</span><span class="en">Web browser (unityroom)</span></dd>
+              <dt><span class="ja">備考</span><span class="en">Note</span></dt><dd><span class="ja">魔法カードなしのルール</span><span class="en">Rules without magic cards</span></dd>
+            </dl>
+            <a class="btn btn-ghost" href="https://unityroom.com/games/magicalcompetition" target="_blank" rel="noopener"><span class="ja">unityroom で遊ぶ</span><span class="en">Play on unityroom</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-links">
+        <a href="../"><span class="ja">← ほかの作品</span><span class="en">← More works</span></a>
+        <a href="https://cardgr.booth.pm/" target="_blank" rel="noopener"><span class="ja">BOOTH ショップ（カード栽培地域）</span><span class="en">BOOTH shop</span></a>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSejovxrdlPM8fUwqdet-BYbVe2LuZ0TeIyc4rvzNm8__Xct-g/viewform?usp=publish-editor" target="_blank" rel="noopener"><span class="ja">お問い合わせ</span><span class="en">Contact</span></a>
+      </div>
+      <p class="copyright">&copy; 2025–2026 Keita Higashi.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      // ── 言語切替（全ページ共通のキー。保存できない環境でも表示は崩さない） ──
+      var STORAGE_KEY = 'kh-lang';
+      var TITLES = {
+        ja: 'マジカル・コンペ — 魔石カードの計算バトル',
+        en: 'Magical Competition — A magic-stone card game'
+      };
+      function readSaved() {
+        try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
+      }
+      function save(lang) {
+        try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) { /* 保存できなくても切替自体は有効 */ }
+      }
+      function applyLang(lang) {
+        var root = document.documentElement;
+        root.setAttribute('data-lang', lang);
+        root.setAttribute('lang', lang);
+        document.title = TITLES[lang];
+        document.querySelectorAll('[data-set-lang]').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b.getAttribute('data-set-lang') === lang));
+        });
+      }
+      var saved = readSaved();
+      var initial = (saved === 'ja' || saved === 'en') ? saved
+        : ((navigator.language || 'ja').toLowerCase().indexOf('ja') === 0 ? 'ja' : 'en');
+      applyLang(initial);
+      document.querySelectorAll('[data-set-lang]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var lang = b.getAttribute('data-set-lang');
+          applyLang(lang);
+          save(lang);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
