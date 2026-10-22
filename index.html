@@ -1,331 +1,680 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CascadeCanvas | Keita Higashi</title>
-  <meta name="description" content="CascadeCanvas（カスケードキャンバス）は、「連鎖を読み解く」新感覚のめくりパズルです。100の名画を解き明かせ。">
+  <title>CascadeCanvas — 連鎖めくりパズル</title>
+  <meta name="description" content="CascadeCanvas（カスケードキャンバス）は、タップで十字に反転し、連鎖を先読みしてすべてのパネルをめくると名画が現れるパズル。100の名画、全10章、修復師の物語。">
+  <meta name="theme-color" content="#141d38">
+  <meta name="apple-itunes-app" content="app-id=6794664453">
+  <link rel="canonical" href="https://keitahigashi.github.io/">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icon-180.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CascadeCanvas">
+  <meta property="og:title" content="CascadeCanvas — 連鎖めくりパズル / A chain-reaction flip puzzle">
+  <meta property="og:description" content="タップで十字に反転。連鎖を読み、すべてめくれば名画が現れる。One tap flips a cross — read the chain and reveal a masterpiece.">
+  <meta property="og:url" content="https://keitahigashi.github.io/">
+  <meta property="og:image" content="https://keitahigashi.github.io/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Shippori+Mincho:wght@500;600&display=swap">
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f0f14;
-      --surface: #1a1a26;
-      --border: #2e2e42;
+      --night: #141d38;
+      --night-deep: #0c1226;
+      --night-card: #1b2647;
+      --line: rgba(232, 201, 122, 0.16);
       --gold: #c9a84c;
       --gold-light: #e8c97a;
-      --text: #e8e4d8;
-      --text-sub: #9a9080;
-      --radius: 12px;
+      --ivory: #efe8db;
+      --ivory-deep: #e4d9c4;
+      --ink: #2b2418;
+      --ink-sub: #6b5f4b;
+      --text: #ece7dc;
+      --text-sub: #a3a8bd;
+      --special: #c0392b;
+      --serif: 'Cormorant Garamond', 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      --serif-ja: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      --sans: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', 'Segoe UI', sans-serif;
+      --wrap: 1080px;
     }
 
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     body {
-      background: var(--bg);
+      background: var(--night-deep);
       color: var(--text);
-      font-family: 'Georgia', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-      line-height: 1.7;
-      min-height: 100vh;
+      font-family: var(--sans);
+      line-height: 1.8;
+      overflow-x: hidden;
     }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; }
+
+    /* ── 言語切替：表示中の言語以外を隠す ── */
+    html[data-lang="ja"] .en,
+    html[data-lang="en"] .ja { display: none !important; }
+    html[data-lang="ja"] .serif-auto { font-family: var(--serif-ja); }
+    html[data-lang="en"] .serif-auto { font-family: var(--serif); }
+
+    .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 20px; }
 
     /* ── Header ── */
-    header {
-      padding: 28px 24px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      max-width: 900px;
-      margin: 0 auto;
+    .site-header {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(12, 18, 38, 0.86);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
     }
-    .site-name {
-      font-size: 0.85rem;
-      letter-spacing: 0.15em;
-      color: var(--text-sub);
-      text-transform: uppercase;
+    .site-header .wrap {
+      display: flex; align-items: center; gap: 16px;
+      height: 60px;
     }
-    .lang-badge {
-      font-size: 0.75rem;
-      color: var(--text-sub);
-      letter-spacing: 0.1em;
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
+    .brand img { width: 32px; height: 32px; border-radius: 8px; }
+    .brand span { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; letter-spacing: 0.04em; color: var(--gold-light); }
+    .nav { display: flex; gap: 20px; }
+    .nav a { text-decoration: none; font-size: 0.85rem; color: var(--text-sub); transition: color .2s; }
+    .nav a:hover { color: var(--gold-light); }
+    .lang-switch { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+    .lang-switch button {
+      background: none; border: 0; color: var(--text-sub);
+      font: 600 0.75rem var(--sans); letter-spacing: 0.08em;
+      padding: 6px 12px; cursor: pointer; min-height: 32px;
     }
+    .lang-switch button[aria-pressed="true"] { background: var(--gold); color: var(--night-deep); }
+    @media (max-width: 720px) { .nav { display: none; } }
 
     /* ── Hero ── */
     .hero {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 72px 24px 56px;
-      text-align: center;
-    }
-    .app-icon {
-      width: 120px;
-      height: 120px;
-      border-radius: 26px;
-      margin: 0 auto 32px;
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(20,29,56,0.80) 0%, rgba(12,18,38,0.94) 70%, var(--night-deep) 100%),
+        url("assets/hero-bg.jpg") center / cover no-repeat;
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
-    .app-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+    .hero .wrap {
+      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center;
+      padding-top: 72px; padding-bottom: 80px;
     }
-    .app-name-ja {
-      font-size: clamp(2rem, 6vw, 3.2rem);
-      font-weight: normal;
-      letter-spacing: 0.05em;
-      color: var(--gold-light);
-      margin-bottom: 4px;
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 12px;
+      font-size: 0.8rem; letter-spacing: 0.2em; color: var(--gold-light); text-transform: uppercase;
+      margin-bottom: 20px;
     }
-    .app-name-en {
-      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-      letter-spacing: 0.25em;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      margin-bottom: 28px;
+    .eyebrow::before { content: ""; width: 40px; height: 2px; background: var(--gold); }
+    .hero h1 {
+      font-weight: 600; line-height: 1.35; letter-spacing: 0.02em;
+      font-size: clamp(2.1rem, 5.4vw, 3.6rem);
+      margin-bottom: 20px;
     }
-    .tagline-ja {
-      font-size: clamp(1rem, 3vw, 1.25rem);
-      color: var(--text);
-      margin-bottom: 6px;
+    html[data-lang="en"] .hero h1 { line-height: 1.15; }
+    .hero .lead { color: #c9cbd6; font-size: 1.02rem; max-width: 34em; margin-bottom: 32px; }
+    .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; }
+    .btn-store {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--gold); color: var(--night-deep);
+      text-decoration: none; font-weight: 700; letter-spacing: 0.04em; font-size: 0.98rem;
+      padding: 14px 28px; border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(201,168,76,0.25);
+      transition: background .2s, transform .15s;
     }
-    .tagline-en {
-      font-size: 0.9rem;
-      color: var(--text-sub);
-      font-style: italic;
-      margin-bottom: 40px;
+    .btn-store:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-store svg { width: 18px; height: 18px; fill: currentColor; }
+    .cta-note { font-size: 0.8rem; color: var(--text-sub); }
+
+    .phone {
+      width: min(300px, 78vw); margin: 0 auto;
+      border-radius: 36px; padding: 10px;
+      background: linear-gradient(160deg, #2a3560, #121a33);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(232,201,122,0.25);
     }
-    .download-btn {
-      display: inline-block;
-      background: var(--gold);
-      color: #0f0f14;
-      text-decoration: none;
-      padding: 14px 36px;
-      border-radius: 40px;
-      font-size: 0.95rem;
-      letter-spacing: 0.08em;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      font-weight: 600;
-      transition: background 0.2s, transform 0.1s;
+    .phone img { border-radius: 28px; width: 100%; height: auto; aspect-ratio: 600 / 1300; object-fit: cover; }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      background: var(--night-deep);
     }
-    .download-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
-    .download-btn:active { transform: translateY(0); }
-    .platform-note {
-      margin-top: 12px;
-      font-size: 0.78rem;
-      color: var(--text-sub);
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    .stat { text-align: center; padding: 22px 8px; }
+    .stat + .stat { border-left: 1px solid var(--line); }
+    .stat b { display: block; font-family: var(--serif); font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 600; color: var(--gold-light); line-height: 1.1; }
+    .stat span { font-size: 0.8rem; color: var(--text-sub); }
+
+    /* ── Section common ── */
+    section { scroll-margin-top: 64px; }
+    .section { padding: 88px 0; }
+    .section-label { font-size: 0.75rem; letter-spacing: 0.28em; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+    .section-title { font-size: clamp(1.6rem, 3.6vw, 2.3rem); font-weight: 600; line-height: 1.4; margin-bottom: 16px; word-break: keep-all; overflow-wrap: anywhere; }
+    .section-lead { color: var(--text-sub); max-width: 40em; margin-bottom: 48px; }
+
+    /* ── How to play ── */
+    .play { background: var(--night); }
+    .play-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+    .steps { list-style: none; display: grid; gap: 28px; }
+    .steps li { display: grid; grid-template-columns: 44px 1fr; gap: 16px; }
+    .steps .num {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: grid; place-items: center;
+      border: 1px solid var(--gold); color: var(--gold-light);
+      font-family: var(--serif); font-size: 1.3rem; font-weight: 600;
+    }
+    .steps h3 { font-size: 1.12rem; font-weight: 600; margin-bottom: 4px; color: var(--gold-light); }
+    .steps p { color: #c3c6d3; font-size: 0.95rem; }
+    .special-chip {
+      display: inline-block; width: 1.1em; height: 1.1em; vertical-align: -0.15em;
+      border: 2px solid var(--special); border-radius: 3px; margin: 0 2px;
     }
 
-    /* ── Divider ── */
-    .divider {
-      max-width: 900px;
-      margin: 0 auto;
-      border: none;
-      border-top: 1px solid var(--border);
+    .demo {
+      background: var(--night-card); border: 1px solid var(--line); border-radius: 18px;
+      padding: 22px; max-width: 420px; width: 100%; justify-self: center;
     }
+    .demo-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; gap: 12px; }
+    .demo-head h3 { font-size: 1rem; font-weight: 600; }
+    .demo-count { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; }
+    .demo-count b { color: var(--gold-light); font-weight: 700; }
+    .board {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+      background: #17120b; padding: 6px; border-radius: 6px;
+      aspect-ratio: 1; perspective: 900px;
+      transition: gap .5s, padding .5s;
+    }
+    .cell { position: relative; border: 0; padding: 0; background: none; cursor: pointer; touch-action: manipulation; }
+    .cell:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; z-index: 1; }
+    .card { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .38s cubic-bezier(.4,.1,.2,1); }
+    .cell.blank .card { transform: rotateY(180deg); }
+    .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 2px; }
+    .face.art { background-image: url("assets/demo-art.jpg"); background-size: 500% 500%; }
+    .face.paper {
+      transform: rotateY(180deg);
+      background:
+        linear-gradient(to top right, transparent calc(50% - 1.5px), #6b5a3e calc(50% - 1.5px), #6b5a3e calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+        linear-gradient(to top left, transparent calc(50% - 1.5px), #6b5a3e calc(50% - 1.5px), #6b5a3e calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+        var(--ivory);
+      box-shadow: inset 0 0 0 3px #6b5a3e;
+    }
+    .board.done { gap: 0; padding: 0; cursor: default; }
+    .board.done .cell { cursor: default; }
+    .board.done .face { border-radius: 0; }
+    .demo-msg { min-height: 3.4em; margin-top: 14px; font-size: 0.88rem; color: var(--text-sub); }
+    .demo-msg.win { color: var(--gold-light); }
+    .demo-actions { display: flex; gap: 10px; margin-top: 6px; }
+    .btn-sub {
+      flex: 1; background: transparent; color: var(--text);
+      border: 1px solid var(--line); border-radius: 10px;
+      font: 600 0.88rem var(--sans); padding: 10px; cursor: pointer; min-height: 44px;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-sub:hover { border-color: var(--gold); color: var(--gold-light); }
+
+    /* ── Screens ── */
+    .screens { background: var(--night-deep); }
+    .shots {
+      display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr);
+      gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory;
+      padding-bottom: 12px; overscroll-behavior-x: contain;
+    }
+    .shots img { scroll-snap-align: start; border-radius: 18px; border: 1px solid var(--line); width: 100%; height: auto; aspect-ratio: 600 / 1300; object-fit: cover; }
+    .shots::-webkit-scrollbar { height: 6px; }
+    .shots::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+    /* ── Story（紙のセクション） ── */
+    .story { background: var(--ivory); color: var(--ink); }
+    .story .section-label { color: #9a7a2c; }
+    .story .section-lead { color: var(--ink-sub); }
+    .parts { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .part {
+      background: #f7f2e8; border: 1px solid var(--ivory-deep); border-radius: 14px;
+      padding: 32px 28px; box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    }
+    .part-no { font-size: 0.75rem; letter-spacing: 0.22em; color: #9a7a2c; text-transform: uppercase; margin-bottom: 6px; }
+    .part h3 { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
+    .part .chapters { font-size: 0.82rem; color: var(--ink-sub); margin-bottom: 16px; }
+    .part p { font-size: 0.95rem; }
+    .part blockquote {
+      margin: 22px 0 18px; padding: 4px 0 4px 18px;
+      border-left: 3px solid var(--gold);
+      font-size: 1.05rem; line-height: 1.75;
+    }
+    .part blockquote cite { display: block; margin-top: 6px; font-style: normal; font-size: 0.78rem; color: var(--ink-sub); font-family: var(--sans); }
+    .rooms { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; }
+    .rooms li { font-size: 0.75rem; padding: 3px 10px; border-radius: 999px; background: var(--ivory-deep); color: #4e4433; }
 
     /* ── Features ── */
-    .features {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 56px 24px;
+    .features { background: var(--night); }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature {
+      background: var(--night-card); border: 1px solid var(--line); border-radius: 14px;
+      padding: 26px 24px;
     }
-    .section-label {
-      font-size: 0.75rem;
-      letter-spacing: 0.25em;
-      color: var(--gold);
-      text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 40px;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    .feature .ico { width: 36px; height: 36px; margin-bottom: 14px; color: var(--gold-light); }
+    .feature .ico svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .feature h3 { font-size: 1.08rem; font-weight: 600; margin-bottom: 6px; }
+    .feature p { color: #c3c6d3; font-size: 0.9rem; }
+    .pricing {
+      margin-top: 28px; padding: 18px 22px; border-radius: 12px;
+      border: 1px dashed var(--line); color: var(--text-sub); font-size: 0.88rem;
     }
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-    }
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 24px;
-    }
-    .feature-icon { font-size: 1.6rem; margin-bottom: 14px; }
-    .feature-title-ja {
-      font-size: 1rem;
-      color: var(--gold-light);
-      margin-bottom: 4px;
-    }
-    .feature-title-en {
-      font-size: 0.72rem;
-      letter-spacing: 0.15em;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    .feature-desc-ja {
-      font-size: 0.88rem;
-      color: var(--text);
-      margin-bottom: 8px;
-      line-height: 1.75;
-    }
-    .feature-desc-en {
-      font-size: 0.8rem;
-      color: var(--text-sub);
-      line-height: 1.65;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      font-style: italic;
-    }
+    .pricing b { color: var(--text); }
 
-    /* ── Gallery teaser ── */
-    .gallery-section {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 24px 64px;
-      text-align: center;
-    }
-    .gallery-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 40px 24px;
-    }
-    .gallery-number {
-      font-size: clamp(2.5rem, 8vw, 4rem);
-      color: var(--gold);
-      line-height: 1;
-      margin-bottom: 8px;
-    }
-    .gallery-label-ja { font-size: 1.1rem; margin-bottom: 6px; }
-    .gallery-label-en {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      font-style: italic;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+    /* ── Closing ── */
+    .closing { background: var(--night-deep); text-align: center; padding: 96px 0; }
+    .closing img { width: 96px; height: 96px; border-radius: 22px; margin: 0 auto 24px; box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+    .closing h2 { font-size: clamp(1.4rem, 3.2vw, 2rem); font-weight: 600; margin-bottom: 28px; line-height: 1.5; word-break: keep-all; }
+    .closing .cta { justify-content: center; }
 
-    /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 32px 24px;
-      text-align: center;
-    }
-    .footer-inner {
-      max-width: 900px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: center;
-    }
-    .footer-links {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .footer-links a {
-      color: var(--text-sub);
-      text-decoration: none;
-      font-size: 0.82rem;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      letter-spacing: 0.05em;
-      transition: color 0.2s;
-    }
-    .footer-links a:hover { color: var(--gold); }
-    .copyright {
-      font-size: 0.78rem;
-      color: var(--text-sub);
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+    footer { border-top: 1px solid var(--line); padding: 28px 0 36px; background: var(--night-deep); }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; align-items: center; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+    .footer-links a { text-decoration: none; font-size: 0.82rem; color: var(--text-sub); }
+    .footer-links a:hover { color: var(--gold-light); }
+    .copyright { font-size: 0.78rem; color: var(--text-sub); }
 
-    @media (max-width: 600px) {
-      .hero { padding: 48px 20px 40px; }
-      .features { padding: 40px 20px; }
-      .gallery-section { padding: 0 20px 48px; }
+    /* ── Responsive ── */
+    @media (max-width: 880px) {
+      .hero .wrap { grid-template-columns: 1fr; gap: 40px; padding-top: 48px; padding-bottom: 56px; text-align: center; }
+      .hero .lead { margin-left: auto; margin-right: auto; }
+      .eyebrow, .cta { justify-content: center; }
+      .play-grid, .parts { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr 1fr; }
+      .section { padding: 64px 0; }
+    }
+    @media (max-width: 560px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(3) { border-left: 0; }
+      .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+      .feature-grid { grid-template-columns: 1fr; }
+      .shots { grid-auto-columns: 72%; }
+      .part { padding: 26px 22px; }
+      .demo { padding: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .card, .board { transition: none; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <span class="site-name">Keita Higashi</span>
-    <span class="lang-badge">JA / EN</span>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="#top"><img src="assets/icon-180.png" alt="" width="32" height="32"><span>CascadeCanvas</span></a>
+      <nav class="nav">
+        <a href="#play"><span class="ja">遊び方</span><span class="en">How to play</span></a>
+        <a href="#story"><span class="ja">物語</span><span class="en">Story</span></a>
+        <a href="#features"><span class="ja">機能</span><span class="en">Features</span></a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="ja" aria-pressed="true">JA</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
   </header>
 
-  <section class="hero">
-    <div class="app-icon"><img src="AppIcon-cascade-1024.png" alt="CascadeCanvas"></div>
-    <h1 class="app-name-ja">カスケードキャンバス</h1>
-    <p class="app-name-en">CascadeCanvas</p>
-    <p class="tagline-ja">連鎖を読み解く、めくりパズル</p>
-    <p class="tagline-en">A chain-reading flip puzzle that reveals hidden masterpieces</p>
-    <a class="download-btn" href="https://apps.apple.com/jp/app/cascadecanvas-%E9%80%A3%E9%8E%96%E3%82%81%E3%81%8F%E3%82%8A%E3%83%91%E3%82%BA%E3%83%AB/id6794664453" target="_blank" rel="noopener">
-      App Store でダウンロード
-    </a>
-    <p class="platform-note">Available on the App Store &nbsp;·&nbsp; iOS</p>
-  </section>
+  <main id="top">
 
-  <hr class="divider">
-
-  <section class="features">
-    <p class="section-label">Features</p>
-    <div class="feature-grid">
-
-      <div class="feature-card">
-        <div class="feature-icon">✚</div>
-        <p class="feature-title-ja">一手で、十字に反転</p>
-        <p class="feature-title-en">Cross Flip in One Tap</p>
-        <p class="feature-desc-ja">タップしたパネルと上下左右が一斉に反転。シンプルなルールなのに、盤面は思わぬ動きを見せます。</p>
-        <p class="feature-desc-en">Tap a panel to flip it and all four adjacent panels at once. Simple rules, surprisingly deep consequences.</p>
+    <!-- ヒーロー -->
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <p class="eyebrow"><span class="ja">連鎖めくりパズル</span><span class="en">A chain-reaction flip puzzle</span></p>
+          <h1 class="serif-auto">
+            <span class="ja">めくって、<br>名画を完成させる</span>
+            <span class="en">Flip the tiles.<br>Reveal the masterpiece.</span>
+          </h1>
+          <p class="lead">
+            <span class="ja">タップひとつで、十字に反転。連鎖の広がりを先読みして、すべてのパネルを表に返せば、隠れていた一枚の名画が現れます。</span>
+            <span class="en">One tap flips a cross of tiles. Read how the chain will spread, turn every tile face-up, and a hidden painting appears.</span>
+          </p>
+          <div class="cta">
+            <a class="btn-store ja" href="https://apps.apple.com/jp/app/cascadecanvas-%E9%80%A3%E9%8E%96%E3%82%81%E3%81%8F%E3%82%8A%E3%83%91%E3%82%BA%E3%83%AB/id6794664453" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3.1.7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.7zM14.2 5.6c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3z"/></svg>
+              App Store でダウンロード
+            </a>
+            <a class="btn-store en" href="https://apps.apple.com/app/id6794664453" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.9-.9-3.1-.8-1.6 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3.1.7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.7zM14.2 5.6c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3z"/></svg>
+              Download on the App Store
+            </a>
+            <span class="cta-note"><span class="ja">基本無料 · iPhone（iOS 17 以降）· 日本語 / English</span><span class="en">Free · iPhone (iOS 17+) · English / 日本語</span></span>
+          </div>
+        </div>
+        <div class="phone">
+          <img class="ja" src="assets/ss/ja/01_clear.jpg" alt="名画《真珠の耳飾りの少女》が完成するプレイ画面" width="600" height="1300">
+          <img class="en" src="assets/ss/en/01_clear.jpg" alt="Gameplay: completing Girl with a Pearl Earring" width="600" height="1300">
+        </div>
       </div>
+    </section>
 
-      <div class="feature-card">
-        <div class="feature-icon">⛓️</div>
-        <p class="feature-title-ja">連鎖して、広がる</p>
-        <p class="feature-title-en">Chain Reactions</p>
-        <p class="feature-desc-ja">特殊パネルが反転範囲に入ると、行や列を一直線に反転させる連鎖が発生。連鎖がさらに連鎖を呼びます。</p>
-        <p class="feature-desc-en">Special panels trigger row or column flips, which can cascade further. Plan the chain before you tap.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">🧠</div>
-        <p class="feature-title-ja">タップ前に、"先読み"する</p>
-        <p class="feature-title-en">Think Before You Tap</p>
-        <p class="feature-desc-ja">総当たりではなく「読む」ことが面白さの核心。最短手順を見つけたときの快感は格別です。</p>
-        <p class="feature-desc-en">The joy is in reading ahead — not brute force. Finding the shortest solution is deeply satisfying.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">🎨</div>
-        <p class="feature-title-ja">めくり終えると、一枚の絵になる</p>
-        <p class="feature-title-en">Reveal a Masterpiece</p>
-        <p class="feature-desc-ja">すべてのパネルを表に返すと、隠されていた名画が現れます。達成感と高揚が同時に訪れる瞬間です。</p>
-        <p class="feature-desc-en">Solve the puzzle to unveil a hidden masterpiece. The moment of completion is unlike anything else.</p>
-      </div>
-
+    <div class="stats">
+      <div class="stat"><b>100</b><span><span class="ja">名画ステージ</span><span class="en">Masterpieces</span></span></div>
+      <div class="stat"><b>10</b><span><span class="ja">章・展示室</span><span class="en">Chapters</span></span></div>
+      <div class="stat"><b><span class="ja">毎日</span><span class="en">Daily</span></b><span><span class="ja">デイリー挑戦</span><span class="en">Challenge</span></span></div>
+      <div class="stat"><b>75</b><span><span class="ja">トロフィー</span><span class="en">Trophies</span></span></div>
     </div>
-  </section>
 
-  <section class="gallery-section">
-    <div class="gallery-box">
-      <p class="gallery-number">100</p>
-      <p class="gallery-label-ja">世界の名画 100点を収録</p>
-      <p class="gallery-label-en">Masterpieces from around the world — each with artwork commentary</p>
-    </div>
-  </section>
+    <!-- 遊び方 -->
+    <section class="section play" id="play">
+      <div class="wrap">
+        <p class="section-label">How to play</p>
+        <h2 class="section-title serif-auto"><span class="ja">ルールはひとつ。奥行きは、連鎖に。</span><span class="en">One simple rule. All the depth is in the chain.</span></h2>
+        <p class="section-lead"><span class="ja">総当たりではなく「読む」パズル。次の一手が盤面をどう変えるかを追い、最短の手順を見つけてください。</span><span class="en">A puzzle about foresight, not brute force. Trace how each move reshapes the board and find the shortest path.</span></p>
+
+        <div class="play-grid">
+          <ol class="steps">
+            <li>
+              <span class="num">1</span>
+              <div>
+                <h3><span class="ja">一手で、十字に反転</span><span class="en">One tap, a cross flip</span></h3>
+                <p><span class="ja">パネルをタップすると、そのパネルと上下左右の4枚が一斉に反転します。</span><span class="en">Tap a tile and it flips together with its four neighbours.</span></p>
+              </div>
+            </li>
+            <li>
+              <span class="num">2</span>
+              <div>
+                <h3><span class="ja">連鎖を、読む</span><span class="en">Read the chain</span></h3>
+                <p><span class="ja">赤い縁取りの<span class="special-chip" aria-hidden="true"></span>特殊パネルは、反転の範囲に入ると起動。一直線・十字・斜めへと反転を走らせ、連鎖がさらに連鎖を呼びます。</span><span class="en">Special tiles <span class="special-chip" aria-hidden="true"></span> with a red border fire when a flip reaches them — sending flips along a line, a cross or the diagonals, setting off further chains.</span></p>
+              </div>
+            </li>
+            <li>
+              <span class="num">3</span>
+              <div>
+                <h3><span class="ja">めくり終えると、名画になる</span><span class="en">Flip them all, reveal the art</span></h3>
+                <p><span class="ja">すべてを表に返せば完成。目標手数以内・ヒントなしなら ★3。</span><span class="en">Turn every tile face-up to finish. Within the target moves and without hints earns ★3.</span></p>
+              </div>
+            </li>
+          </ol>
+
+          <div class="demo" aria-labelledby="demo-title">
+            <div class="demo-head">
+              <h3 id="demo-title"><span class="ja">ここで試せます</span><span class="en">Try it here</span></h3>
+              <span class="demo-count"><span class="ja">タップ</span><span class="en">Taps</span> <b id="demo-taps">0</b> ／ <span class="ja">目標</span><span class="en">Goal</span> <b id="demo-goal">3</b></span>
+            </div>
+            <div class="board" id="board"></div>
+            <p class="demo-msg" id="demo-msg" aria-live="polite">
+              <span class="ja">パネルをタップすると十字に反転。白紙（×印）をなくして、すべてを絵にすれば完成です。</span>
+              <span class="en">Tap a tile to flip a cross. Clear every blank (×) tile to reveal the painting.</span>
+            </p>
+            <div class="demo-actions">
+              <button type="button" class="btn-sub" id="demo-reset"><span class="ja">やり直す</span><span class="en">Reset</span></button>
+              <button type="button" class="btn-sub" id="demo-new"><span class="ja">別の盤</span><span class="en">New board</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 画面写真 -->
+    <section class="section screens" id="screens">
+      <div class="wrap">
+        <p class="section-label">Screenshots</p>
+        <h2 class="section-title serif-auto"><span class="ja">画面</span><span class="en">In the app</span></h2>
+        <div class="shots ja">
+          <img src="assets/ss/ja/01_clear.jpg" alt="めくって、名画を完成させる" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/ja/02_chain.jpg" alt="特殊パネルの連鎖" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/ja/03_read.jpg" alt="ヒントで次の一手を読む" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/ja/04_gallery.jpg" alt="集めた100の名画を解説つきで" loading="lazy" width="600" height="1300">
+        </div>
+        <div class="shots en">
+          <img src="assets/ss/en/01_clear.jpg" alt="Flip the tiles and complete the masterpiece" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/en/02_chain.jpg" alt="Special tiles set off a chain" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/en/03_read.jpg" alt="Hints show the next move" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/en/04_gallery.jpg" alt="Collect 100 masterpieces with commentary" loading="lazy" width="600" height="1300">
+        </div>
+      </div>
+    </section>
+
+    <!-- 物語 -->
+    <section class="section story" id="story">
+      <div class="wrap">
+        <p class="section-label">Story</p>
+        <h2 class="section-title serif-auto"><span class="ja">一枚めくるごとに、<wbr>画廊が甦る</span><span class="en">With every painting, the gallery comes back to life</span></h2>
+        <p class="section-lead"><span class="ja">あなたは、祖父が遺した画廊を継いだ修復師。埃と古いニスに眠る名画を一枚ずつ蘇らせるたび、物語が少しずつ進み、章ごとに展示室がひとつ開きます。</span><span class="en">You are a restorer who has inherited your grandfather's gallery. Each painting you bring back moves the story forward, and each chapter reopens another room.</span></p>
+
+        <div class="parts">
+          <article class="part">
+            <p class="part-no">Part I</p>
+            <h3 class="serif-auto"><span class="ja">祖父の日誌</span><span class="en">My Grandfather's Journal</span></h3>
+            <p class="chapters"><span class="ja">第1〜5章 · 1〜50面</span><span class="en">Chapters 1–5 · Stages 1–50</span></p>
+            <p><span class="ja">修復のたびに見つかる、祖父の修復日誌の断片。洗浄、線通し、交差読み——技法を覚えながら頁を追ううちに、祖父が最後に遺した一枚へと近づいていきます。</span><span class="en">Each restoration uncovers another page of your grandfather's journal. As you learn his techniques — cleaning, tracing the line, reading the crossings — you draw closer to the last painting he left behind.</span></p>
+            <blockquote class="serif-auto">
+              <span class="ja">「色は、洗えば戻る。人は、そうはいかんがな」</span>
+              <span class="en">“Color comes back when you wash it. People don't.”</span>
+              <cite><span class="ja">— 祖父の修復日誌、一頁め</span><span class="en">— Grandfather's journal, page one</span></cite>
+            </blockquote>
+            <ul class="rooms">
+              <li><span class="ja">ひかりの間</span><span class="en">Hall of Light</span></li>
+              <li><span class="ja">ひとすじの間</span><span class="en">Corridor of Lines</span></li>
+              <li><span class="ja">まじわりの間</span><span class="en">Hall of Crossings</span></li>
+              <li><span class="ja">かなめの間</span><span class="en">Hall of the Keystone</span></li>
+              <li><span class="ja">ひびきの間</span><span class="en">Hall of Resonance</span></li>
+            </ul>
+          </article>
+
+          <article class="part">
+            <p class="part-no">Part II</p>
+            <h3 class="serif-auto"><span class="ja">扉を開いた画廊</span><span class="en">The Gallery Opens Its Doors</span></h3>
+            <p class="chapters"><span class="ja">第6〜10章 · 51〜100面</span><span class="en">Chapters 6–10 · Stages 51–100</span></p>
+            <p><span class="ja">再び扉を開いた画廊に、外から絵と依頼が届きはじめます。新しい帳面に自分の字で日誌を書き、やがて弟子を迎える日々。祖父の師は誰だったのか。祖母が最後に頼んだこととは。</span><span class="en">With the doors open, paintings and commissions begin to arrive. You start a journal in your own hand, and in time take on an apprentice. Who was your grandfather's teacher? And what was your grandmother's last request?</span></p>
+            <blockquote class="serif-auto">
+              <span class="ja">「今日から、私の字で書く。祖父ほど、うまくはない」</span>
+              <span class="en">“From today, I write in my own hand. It is not as good as his.”</span>
+              <cite><span class="ja">— 私の日誌</span><span class="en">— My journal</span></cite>
+            </blockquote>
+            <ul class="rooms">
+              <li><span class="ja">あけぼのの間</span><span class="en">Hall of Dawn</span></li>
+              <li><span class="ja">ともしびの間</span><span class="en">Hall of Lamplight</span></li>
+              <li><span class="ja">あらしの間</span><span class="en">Hall of Storms</span></li>
+              <li><span class="ja">うつしの間</span><span class="en">Hall of Reflections</span></li>
+              <li><span class="ja">むすびの間</span><span class="en">Hall of Bonds</span></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 機能 -->
+    <section class="section features" id="features">
+      <div class="wrap">
+        <p class="section-label">Features</p>
+        <h2 class="section-title serif-auto"><span class="ja">遊ぶほど、集まる</span><span class="en">The more you play, the more you collect</span></h2>
+        <p class="section-lead"><span class="ja">スキマ時間に一面ずつ。静かに没頭できる思考型パズルです。</span><span class="en">One stage at a time, whenever you have a moment. A quiet, thinking-first puzzle.</span></p>
+
+        <div class="feature-grid">
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+            <h3><span class="ja">100面・全10章</span><span class="en">100 stages, 10 chapters</span></h3>
+            <p><span class="ja">章が進むごとに特殊パネルの種類と密度が増していきます。最終章は、正解がひとつではない盤。</span><span class="en">Special tiles grow in variety and density chapter by chapter. The final chapter has boards with more than one answer.</span></p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg></div>
+            <h3><span class="ja">デイリーチャレンジ</span><span class="en">Daily challenge</span></h3>
+            <p><span class="ja">毎日届く1問。結果は絵文字つきの共有文で、友だちにシェアできます。</span><span class="en">A new puzzle every day. Share your result as an emoji summary with friends.</span></p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10M19 21V10M9 21v-7M15 21v-7M2 10l10-6 10 6z"/></svg></div>
+            <h3><span class="ja">名画ギャラリー</span><span class="en">Masterpiece gallery</span></h3>
+            <p><span class="ja">★3で仕上げた名画が美術館に並びます。作品ごとに作者・制作年・解説つき。</span><span class="en">Paintings you finish with ★3 hang in your own museum, each with artist, year and commentary.</span></p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg></div>
+            <h3><span class="ja">トロフィー 75件</span><span class="en">75 trophies</span></h3>
+            <p><span class="ja">章のクリア、★の数、デイリー——遊び方に応じて実績が積み上がります。</span><span class="en">Chapters cleared, stars earned, daily streaks — achievements that grow with how you play.</span></p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg></div>
+            <h3><span class="ja">ヒントと面スキップ</span><span class="en">Hints &amp; skips</span></h3>
+            <p><span class="ja">次の一手を金の枠で示すヒント。どうしても詰まった面は、動画広告を見て先へ進めます。</span><span class="en">Hints outline your next move in gold. Truly stuck? Watch a video ad to skip ahead.</span></p>
+          </div>
+          <div class="feature">
+            <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <h3><span class="ja">気持ちいい手触り</span><span class="en">Satisfying feel</span></h3>
+            <p><span class="ja">連鎖の波ごとに高まる音と振動、走る光の筋、完成の瞬間に広がる光の波紋。</span><span class="en">Sound and haptics that rise with each wave of the chain, streaks of light, and a ripple when the painting is complete.</span></p>
+          </div>
+        </div>
+
+        <p class="pricing">
+          <span class="ja"><b>基本無料</b>（広告あり）。買い切りの「広告を削除＋ヒント無制限」もご用意しています。</span>
+          <span class="en"><b>Free to play</b> with ads. A one-time “Remove Ads + Unlimited Hints” purchase is also available.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- 締め -->
+    <section class="closing">
+      <div class="wrap">
+        <img src="assets/icon-180.png" alt="CascadeCanvas" width="96" height="96">
+        <h2 class="serif-auto"><span class="ja">連鎖を読み解き、<br>あなたの手で<wbr>名画を<wbr>完成させてください。</span><span class="en">Read the chain.<br>Complete the masterpiece.</span></h2>
+        <div class="cta">
+          <a class="btn-store ja" href="https://apps.apple.com/jp/app/cascadecanvas-%E9%80%A3%E9%8E%96%E3%82%81%E3%81%8F%E3%82%8A%E3%83%91%E3%82%BA%E3%83%AB/id6794664453" target="_blank" rel="noopener">App Store でダウンロード</a>
+          <a class="btn-store en" href="https://apps.apple.com/app/id6794664453" target="_blank" rel="noopener">Download on the App Store</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
 
   <footer>
-    <div class="footer-inner">
+    <div class="wrap">
       <div class="footer-links">
-        <a href="https://apps.apple.com/jp/app/cascadecanvas-%E9%80%A3%E9%8E%96%E3%82%81%E3%81%8F%E3%82%8A%E3%83%91%E3%82%BA%E3%83%AB/id6794664453" target="_blank" rel="noopener">App Store</a>
-        <a href="https://app.notion.com/p/Privacy-Policy-1571a1eeeb384c528c6149ee3e3b9ca0" target="_blank" rel="noopener">プライバシーポリシー / Privacy Policy</a>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSejovxrdlPM8fUwqdet-BYbVe2LuZ0TeIyc4rvzNm8__Xct-g/viewform?usp=publish-editor" target="_blank" rel="noopener">お問い合わせ / Contact</a>
+        <a href="https://apps.apple.com/app/id6794664453" target="_blank" rel="noopener">App Store</a>
+        <a href="https://app.notion.com/p/Privacy-Policy-1571a1eeeb384c528c6149ee3e3b9ca0" target="_blank" rel="noopener"><span class="ja">プライバシーポリシー</span><span class="en">Privacy Policy</span></a>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSejovxrdlPM8fUwqdet-BYbVe2LuZ0TeIyc4rvzNm8__Xct-g/viewform?usp=publish-editor" target="_blank" rel="noopener"><span class="ja">お問い合わせ</span><span class="en">Contact</span></a>
       </div>
-      <p class="copyright">&copy; 2025 Keita Higashi. All rights reserved.</p>
+      <p class="copyright">&copy; 2025–2026 Keita Higashi. <span class="ja">名画はすべてパブリックドメインの作品です。</span><span class="en">All paintings are in the public domain.</span></p>
     </div>
   </footer>
 
+  <script>
+    (function () {
+      // ── 言語切替（保存できない環境でも表示は崩さない） ──
+      var STORAGE_KEY = 'cc-lang';
+      var META = {
+        ja: { title: 'CascadeCanvas — 連鎖めくりパズル' },
+        en: { title: 'CascadeCanvas — A chain-reaction flip puzzle' }
+      };
+      function readSaved() {
+        try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
+      }
+      function save(lang) {
+        try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) { /* 保存できなくても切替自体は有効 */ }
+      }
+      function applyLang(lang) {
+        var root = document.documentElement;
+        root.setAttribute('data-lang', lang);
+        root.setAttribute('lang', lang);
+        document.title = META[lang].title;
+        document.querySelectorAll('[data-set-lang]').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b.getAttribute('data-set-lang') === lang));
+        });
+      }
+      var saved = readSaved();
+      var initial = (saved === 'ja' || saved === 'en') ? saved
+        : ((navigator.language || 'ja').toLowerCase().indexOf('ja') === 0 ? 'ja' : 'en');
+      applyLang(initial);
+      document.querySelectorAll('[data-set-lang]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var lang = b.getAttribute('data-set-lang');
+          applyLang(lang);
+          save(lang);
+        });
+      });
+
+      // ── 十字反転デモ（5×5。完成状態から数手を打って崩すので、必ずその手数で解ける） ──
+      var SIZE = 5;
+      var SCRAMBLE_TAPS = 3;
+      var FIRST_BOARD = [6, 18, 12]; // 最初の盤は固定（毎回同じ体験から始める）
+      var boardEl = document.getElementById('board');
+      var tapsEl = document.getElementById('demo-taps');
+      var goalEl = document.getElementById('demo-goal');
+      var msgEl = document.getElementById('demo-msg');
+      var blank = [];
+      var start = [];
+      var taps = 0;
+      var cells = [];
+      var MSG_IDLE = msgEl.innerHTML;
+      var MSG_WIN =
+        '<span class="ja">完成！ ヨハネス・フェルメール《真珠の耳飾りの少女》。アプリでは100点の名画が待っています。</span>' +
+        '<span class="en">Complete! Johannes Vermeer, “Girl with a Pearl Earring”. 100 masterpieces await in the app.</span>';
+
+      function crossOf(i) {
+        var r = Math.floor(i / SIZE), c = i % SIZE, out = [i];
+        if (r > 0) out.push(i - SIZE);
+        if (r < SIZE - 1) out.push(i + SIZE);
+        if (c > 0) out.push(i - 1);
+        if (c < SIZE - 1) out.push(i + 1);
+        return out;
+      }
+      function scramble(tapList) {
+        var b = new Array(SIZE * SIZE).fill(false);
+        tapList.forEach(function (i) { crossOf(i).forEach(function (j) { b[j] = !b[j]; }); });
+        return b;
+      }
+      function randomTaps() {
+        var picked = [];
+        while (picked.length < SCRAMBLE_TAPS) {
+          var i = Math.floor(Math.random() * SIZE * SIZE);
+          if (picked.indexOf(i) < 0) picked.push(i);
+        }
+        return picked;
+      }
+      function isSolved() { return blank.every(function (v) { return !v; }); }
+      function render() {
+        cells.forEach(function (el, i) {
+          el.classList.toggle('blank', blank[i]);
+          el.setAttribute('aria-pressed', String(!blank[i]));
+        });
+        tapsEl.textContent = String(taps);
+        var solved = isSolved();
+        boardEl.classList.toggle('done', solved);
+        msgEl.classList.toggle('win', solved);
+        msgEl.innerHTML = solved ? MSG_WIN : MSG_IDLE;
+      }
+      function load(tapList) {
+        start = scramble(tapList);
+        blank = start.slice();
+        taps = 0;
+        goalEl.textContent = String(tapList.length);
+        render();
+      }
+
+      for (var i = 0; i < SIZE * SIZE; i++) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cell';
+        btn.setAttribute('aria-label', (Math.floor(i / SIZE) + 1) + '-' + (i % SIZE + 1));
+        var r = Math.floor(i / SIZE), c = i % SIZE;
+        btn.innerHTML =
+          '<span class="card"><span class="face art" style="background-position:' +
+          (c * 25) + '% ' + (r * 25) + '%"></span><span class="face paper"></span></span>';
+        (function (idx) {
+          btn.addEventListener('click', function () {
+            if (isSolved()) return;
+            crossOf(idx).forEach(function (j) { blank[j] = !blank[j]; });
+            taps++;
+            render();
+          });
+        })(i);
+        boardEl.appendChild(btn);
+        cells.push(btn);
+      }
+      document.getElementById('demo-reset').addEventListener('click', function () {
+        blank = start.slice(); taps = 0; render();
+      });
+      document.getElementById('demo-new').addEventListener('click', function () {
+        load(randomTaps());
+      });
+      load(FIRST_BOARD);
+    })();
+  </script>
 </body>
 </html>
