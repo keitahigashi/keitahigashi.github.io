@@ -142,7 +142,7 @@
       background: linear-gradient(160deg, #2a3560, #121a33);
       box-shadow: 0 30px 80px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(232,201,122,0.25);
     }
-    .phone img { border-radius: 28px; width: 100%; height: auto; aspect-ratio: 600 / 1300; object-fit: cover; }
+    .phone img, .phone video { display: block; border-radius: 28px; width: 100%; height: auto; aspect-ratio: 600 / 1300; object-fit: cover; background: var(--night-deep); }
 
     .stats {
       display: grid; grid-template-columns: repeat(4, 1fr);
@@ -354,8 +354,8 @@
           </div>
         </div>
         <div class="phone">
-          <img class="ja" src="assets/ss/ja/01_clear.jpg" alt="名画《真珠の耳飾りの少女》が完成するプレイ画面" width="600" height="1300">
-          <img class="en" src="assets/ss/en/01_clear.jpg" alt="Gameplay: completing Girl with a Pearl Earring" width="600" height="1300">
+          <video class="ja" data-preview src="assets/video/preview_ja.mp4" poster="assets/video/preview_ja_poster.jpg" muted loop playsinline preload="none" width="600" height="1300" aria-label="プレイ動画：十字に反転させ、連鎖で名画を完成させる"></video>
+          <video class="en" data-preview src="assets/video/preview_en.mp4" poster="assets/video/preview_en_poster.jpg" muted loop playsinline preload="none" width="600" height="1300" aria-label="Gameplay video: flip a cross of tiles and complete the painting with chain reactions"></video>
         </div>
       </div>
     </section>
@@ -425,14 +425,14 @@
         <h2 class="section-title serif-auto"><span class="ja">画面</span><span class="en">In the app</span></h2>
         <div class="shots ja">
           <img src="assets/ss/ja/01_clear.jpg" alt="めくって、名画を完成させる" loading="lazy" width="600" height="1300">
-          <img src="assets/ss/ja/02_chain.jpg" alt="特殊パネルの連鎖" loading="lazy" width="600" height="1300">
-          <img src="assets/ss/ja/03_read.jpg" alt="ヒントで次の一手を読む" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/ja/02_chain.jpg" alt="一手で十字に。仕掛けで一列に連鎖" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/ja/03_read.jpg" alt="連鎖を読んで、最短の一手を" loading="lazy" width="600" height="1300">
           <img src="assets/ss/ja/04_gallery.jpg" alt="集めた100の名画を解説つきで" loading="lazy" width="600" height="1300">
         </div>
         <div class="shots en">
-          <img src="assets/ss/en/01_clear.jpg" alt="Flip the tiles and complete the masterpiece" loading="lazy" width="600" height="1300">
-          <img src="assets/ss/en/02_chain.jpg" alt="Special tiles set off a chain" loading="lazy" width="600" height="1300">
-          <img src="assets/ss/en/03_read.jpg" alt="Hints show the next move" loading="lazy" width="600" height="1300">
+          <img src="assets/ss/en/01_clear.jpg" alt="Flip the tiles. Reveal a masterpiece." loading="lazy" width="600" height="1300">
+          <img src="assets/ss/en/02_chain.jpg" alt="One tap flips a cross. Specials chain a line." loading="lazy" width="600" height="1300">
+          <img src="assets/ss/en/03_read.jpg" alt="Read the chain. Find the fewest taps." loading="lazy" width="600" height="1300">
           <img src="assets/ss/en/04_gallery.jpg" alt="Collect 100 masterpieces with commentary" loading="lazy" width="600" height="1300">
         </div>
       </div>
@@ -581,6 +581,26 @@
         document.title = META[lang].title;
         document.querySelectorAll('[data-set-lang]').forEach(function (b) {
           b.setAttribute('aria-pressed', String(b.getAttribute('data-set-lang') === lang));
+        });
+        syncPreview(lang);
+      }
+
+      // ── プレイ動画：表示中の言語の1本だけを読み込んで再生する（両方を読み込むと通信量が倍になるため） ──
+      // 動きを減らす設定の人には再生せず、ポスター画像だけを見せる
+      var REDUCE_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.querySelectorAll('video[data-preview]').forEach(function (v) {
+        v.addEventListener('playing', function () { if (!REDUCE_MOTION) { v.controls = false; } });
+      });
+      function syncPreview(lang) {
+        document.querySelectorAll('video[data-preview]').forEach(function (v) {
+          if (!v.classList.contains(lang)) { v.pause(); return; }
+          if (REDUCE_MOTION) { v.controls = true; return; }
+          var p = v.play();
+          if (p && p.catch) {
+            // 自動再生を止められた環境（省電力モード等）では、操作して再生できるようにする。
+            // 読み込み中に一度失敗しても後から再生が始まることがあるため、止まったままのときだけ操作バーを出す
+            p.catch(function () { if (v.paused) { v.controls = true; } });
+          }
         });
       }
       var saved = readSaved();
