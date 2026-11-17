@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja" data-lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カラーコードあて — HEX から色を当てるミニゲーム</title>
+  <meta name="description" content="#3A7BD5 はどんな色？ カラーコード（HEX）を見て、6つの色から正解を選ぶブラウザ用ミニゲーム。正解するほど色が近くなっていきます。">
+  <meta name="theme-color" content="#0e0f17">
+  <link rel="canonical" href="https://keitahigashi.github.io/hexguess/">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="../assets/icon-180.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Keita Higashi">
+  <meta property="og:title" content="カラーコードあて / Hex Guess">
+  <meta property="og:description" content="カラーコードを見て色を当てるミニゲーム。Read a hex code, pick the color.">
+  <meta property="og:url" content="https://keitahigashi.github.io/hexguess/">
+  <meta property="og:image" content="https://keitahigashi.github.io/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Shippori+Mincho:wght@500;600&display=swap">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0f17;
+      --card: #171926;
+      --line: rgba(232, 201, 122, 0.16);
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --text: #ece7dc;
+      --text-sub: #a3a6b8;
+      --ok: #7fd1a0;
+      --ng: #ef8a7c;
+      --serif: 'Cormorant Garamond', 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      --serif-ja: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      --sans: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', 'Segoe UI', sans-serif;
+      --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, 'Courier New', monospace;
+      --wrap: 720px;
+    }
+
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.8;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    a { color: inherit; }
+    button { font: inherit; color: inherit; }
+
+    /* ── 言語切替：表示中の言語以外を隠す ── */
+    html[data-lang="ja"] .en,
+    html[data-lang="en"] .ja { display: none !important; }
+    html[data-lang="ja"] .serif-auto { font-family: var(--serif-ja); }
+    html[data-lang="en"] .serif-auto { font-family: var(--serif); }
+
+    .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 16px; width: 100%; }
+
+    /* ── Header ── */
+    .site-header { border-bottom: 1px solid var(--line); }
+    .site-header .wrap { max-width: 1080px; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+    .site-name { font-family: var(--serif); font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; color: var(--gold-light); text-decoration: none; }
+    .lang-switch { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+    .lang-switch button {
+      background: none; border: 0; color: var(--text-sub);
+      font: 600 0.75rem var(--sans); letter-spacing: 0.08em;
+      padding: 6px 12px; cursor: pointer; min-height: 32px;
+    }
+    .lang-switch button[aria-pressed="true"] { background: var(--gold); color: var(--bg); }
+
+    /* ── Intro ── */
+    .intro { padding: 40px 0 20px; }
+    .back { font-size: 0.82rem; color: var(--text-sub); text-decoration: none; }
+    .back:hover { color: var(--gold-light); }
+    .intro h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 600; line-height: 1.35; margin: 10px 0 6px; }
+    .intro p { color: var(--text-sub); font-size: 0.92rem; }
+
+    /* ── Game ── */
+    main { flex: 1; padding-bottom: 72px; }
+    .game {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+      padding: 20px 20px 24px;
+    }
+    .status { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 0.85rem; color: var(--text-sub); }
+    .status b { color: var(--text); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+    .lives { letter-spacing: 0.2em; color: var(--gold-light); font-size: 1rem; }
+    .lives .lost { color: rgba(232, 201, 122, 0.25); }
+
+    .prompt { text-align: center; margin: 22px 0 18px; }
+    .prompt p { font-size: 0.85rem; color: var(--text-sub); }
+    .code {
+      font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em;
+      font-size: clamp(2.2rem, 9vw, 3.2rem); line-height: 1.2; color: var(--text);
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .swatch {
+      position: relative; aspect-ratio: 4 / 3; border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.08); cursor: pointer;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding: 6px; transition: transform .12s, border-color .12s, opacity .2s;
+    }
+    .swatch:hover:not(:disabled) { transform: translateY(-2px); border-color: rgba(232,201,122,0.6); }
+    .swatch:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 3px; }
+    .swatch:disabled { cursor: default; }
+    .swatch .key {
+      position: absolute; top: 6px; left: 8px; font-size: 0.7rem; font-weight: 700;
+      opacity: 0.55; color: var(--fg, #fff);
+    }
+    .swatch .hex { font-family: var(--mono); font-size: 0.8rem; font-weight: 700; color: var(--fg, #fff); visibility: hidden; }
+    .answered .swatch .hex { visibility: visible; }
+    .answered .swatch { opacity: 0.45; }
+    .answered .swatch.correct, .answered .swatch.picked { opacity: 1; }
+    .swatch.correct { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok); }
+    .swatch.picked:not(.correct) { border-color: var(--ng); box-shadow: 0 0 0 2px var(--ng); }
+
+    .feedback { min-height: 3.2em; margin-top: 18px; text-align: center; }
+    .feedback .verdict { font-weight: 700; font-size: 1.05rem; }
+    .feedback .verdict.ok { color: var(--ok); }
+    .feedback .verdict.ng { color: var(--ng); }
+
+    .rgb { display: none; margin: 12px auto 0; max-width: 360px; font-size: 0.82rem; }
+    .answered .rgb { display: block; }
+    .rgb-row { display: grid; grid-template-columns: 1.4em 2.4em 1fr 2.6em; align-items: center; gap: 8px; }
+    .rgb-row + .rgb-row { margin-top: 4px; }
+    .rgb-row .ch { font-weight: 700; }
+    .rgb-row code { font-family: var(--mono); color: var(--gold-light); }
+    .rgb-row .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-sub); }
+    .bar { height: 8px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+    .bar i { display: block; height: 100%; border-radius: 999px; }
+
+    .actions { display: flex; justify-content: center; margin-top: 18px; min-height: 44px; }
+    .btn {
+      background: var(--gold); color: var(--bg); border: 0; border-radius: 999px;
+      font-weight: 700; font-size: 0.95rem; padding: 10px 28px; min-height: 44px; cursor: pointer;
+    }
+    .btn:hover { background: var(--gold-light); }
+    .btn:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 3px; }
+    .btn[hidden] { display: none; }
+
+    .over { display: none; text-align: center; padding: 8px 0 4px; }
+    .is-over .over { display: block; }
+    .is-over .play { display: none; }
+    .over h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
+    .over .final { font-size: 3rem; font-weight: 700; color: var(--gold-light); line-height: 1.2; font-variant-numeric: tabular-nums; }
+    .over .newbest { color: var(--ok); font-weight: 700; font-size: 0.9rem; min-height: 1.6em; }
+    .over p { color: var(--text-sub); font-size: 0.9rem; }
+    .over .btn { margin-top: 18px; }
+
+    /* ── Tips ── */
+    .tips { margin-top: 32px; }
+    .tips h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+    .tips ul { padding-left: 1.2em; color: #c9c9d3; font-size: 0.9rem; }
+    .tips li + li { margin-top: 6px; }
+    .tips code { font-family: var(--mono); color: var(--gold-light); }
+
+    footer { border-top: 1px solid var(--line); padding: 28px 0 36px; }
+    footer .wrap { max-width: 1080px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; align-items: center; }
+    .footer-links a { text-decoration: none; font-size: 0.82rem; color: var(--text-sub); }
+    .footer-links a:hover { color: var(--gold-light); }
+    .copyright { font-size: 0.78rem; color: var(--text-sub); }
+
+    @media (max-width: 420px) {
+      .game { padding: 16px 14px 20px; }
+      .grid { gap: 8px; }
+      .swatch .hex { font-size: 0.7rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .swatch { transition: none; }
+      .swatch:hover:not(:disabled) { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a class="site-name" href="../">Keita Higashi</a>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="ja" aria-pressed="true">JA</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div class="wrap">
+        <a class="back" href="../"><span class="ja">← 作品一覧</span><span class="en">← All works</span></a>
+        <h1 class="serif-auto"><span class="ja">カラーコードあて</span><span class="en">Hex Guess</span></h1>
+        <p><span class="ja">カラーコードを見て、6つの中から正しい色を選んでください。正解するほど色が近くなります。ミスは3回まで。</span><span class="en">Read the hex code and pick the matching color from six. The colors get closer the more you get right. Three misses and it's over.</span></p>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <section class="game" id="game" aria-label="Game">
+        <div class="status">
+          <span><span class="ja">スコア</span><span class="en">Score</span> <b id="score">0</b></span>
+          <span class="lives" id="lives" aria-label="Lives"></span>
+          <span><span class="ja">ベスト</span><span class="en">Best</span> <b id="best">0</b></span>
+        </div>
+
+        <div class="play">
+          <div class="prompt">
+            <p><span class="ja">このコードの色はどれ？</span><span class="en">Which color is this?</span></p>
+            <div class="code" id="code" aria-live="polite">#000000</div>
+          </div>
+
+          <div class="grid" id="grid"></div>
+
+          <div class="feedback" id="feedback" aria-live="polite"></div>
+          <div class="rgb" id="rgb"></div>
+
+          <div class="actions">
+            <button type="button" class="btn" id="next" hidden><span class="ja">次へ</span><span class="en">Next</span></button>
+          </div>
+        </div>
+
+        <div class="over">
+          <h2 class="serif-auto"><span class="ja">ゲーム終了</span><span class="en">Game over</span></h2>
+          <div class="final" id="final">0</div>
+          <div class="newbest" id="newbest"></div>
+          <p><span class="ja">ベスト</span><span class="en">Best</span> <span id="best2">0</span></p>
+          <button type="button" class="btn" id="retry"><span class="ja">もう一度</span><span class="en">Play again</span></button>
+        </div>
+      </section>
+
+      <section class="tips">
+        <h2 class="serif-auto"><span class="ja">コードの読み方</span><span class="en">How to read a hex code</span></h2>
+        <ul>
+          <li><span class="ja"><code>#RRGGBB</code> の2文字ずつが、赤・緑・青の強さです。<code>00</code> が最も弱く、<code>FF</code>（255）が最も強い。</span><span class="en">Each pair in <code>#RRGGBB</code> is the strength of red, green and blue — from <code>00</code> (none) to <code>FF</code> (255, full).</span></li>
+          <li><span class="ja">まず各ペアの1文字目だけを見ると、だいたいの色がつかめます。<code>#E02A1C</code> なら <code>E</code>・<code>2</code>・<code>1</code> で、赤が強く緑と青が弱い → 赤系。</span><span class="en">Glance at the first digit of each pair to get the rough color. <code>#E02A1C</code> reads <code>E</code>, <code>2</code>, <code>1</code>: strong red, weak green and blue — a red.</span></li>
+          <li><span class="ja">3つとも大きければ明るく、3つとも小さければ暗く、3つが近ければ灰色に近づきます。</span><span class="en">All three high means light, all three low means dark, and three similar values lean gray.</span></li>
+          <li><span class="ja">キーボードでは <code>1</code>〜<code>6</code> で選び、<code>Enter</code> で次へ進めます。</span><span class="en">On a keyboard, press <code>1</code>–<code>6</code> to choose and <code>Enter</code> to continue.</span></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-links">
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSejovxrdlPM8fUwqdet-BYbVe2LuZ0TeIyc4rvzNm8__Xct-g/viewform?usp=publish-editor" target="_blank" rel="noopener"><span class="ja">お問い合わせ</span><span class="en">Contact</span></a>
+      </div>
+      <p class="copyright">&copy; 2025–2026 Keita Higashi. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      // ── 言語切替（全ページ共通のキー。保存できない環境でも表示は崩さない） ──
+      var LANG_KEY = 'kh-lang';
+      var TITLES = { ja: 'カラーコードあて — HEX から色を当てるミニゲーム', en: 'Hex Guess — Read the code, pick the color' };
+      function readSaved(key) {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+      }
+      function save(key, value) {
+        try { localStorage.setItem(key, value); } catch (e) { /* 保存できなくても遊ぶこと自体は可能 */ }
+      }
+      function applyLang(lang) {
+        var root = document.documentElement;
+        root.setAttribute('data-lang', lang);
+        root.setAttribute('lang', lang);
+        document.title = TITLES[lang];
+        document.querySelectorAll('[data-set-lang]').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b.getAttribute('data-set-lang') === lang));
+        });
+      }
+      var savedLang = readSaved(LANG_KEY);
+      applyLang((savedLang === 'ja' || savedLang === 'en') ? savedLang
+        : ((navigator.language || 'ja').toLowerCase().indexOf('ja') === 0 ? 'ja' : 'en'));
+      document.querySelectorAll('[data-set-lang]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var lang = b.getAttribute('data-set-lang');
+          applyLang(lang);
+          save(LANG_KEY, lang);
+        });
+      });
+
+      // ── ゲーム設定 ──
+      var BEST_KEY = 'kh-hexguess-best';
+      var CHOICES = 6;
+      var MAX_LIVES = 3;
+      // 選択肢どうしの RGB 距離。正解数に応じて縮め、だんだん見分けにくくする
+      var DIST_START = 140;
+      var DIST_MIN = 22;
+      var DIST_DECAY = 0.9;
+      var MAX_TRIES = 600;
+      var CHANNELS = [
+        { ja: '赤', en: 'R', color: '#e5534b' },
+        { ja: '緑', en: 'G', color: '#57c46b' },
+        { ja: '青', en: 'B', color: '#4f8fe8' }
+      ];
+
+      var el = {
+        game: document.getElementById('game'),
+        score: document.getElementById('score'),
+        best: document.getElementById('best'),
+        best2: document.getElementById('best2'),
+        lives: document.getElementById('lives'),
+        code: document.getElementById('code'),
+        grid: document.getElementById('grid'),
+        feedback: document.getElementById('feedback'),
+        rgb: document.getElementById('rgb'),
+        next: document.getElementById('next'),
+        final: document.getElementById('final'),
+        newbest: document.getElementById('newbest'),
+        retry: document.getElementById('retry')
+      };
+
+      var state = { score: 0, lives: MAX_LIVES, best: 0, answer: 0, choices: [], answered: false, over: false };
+      var savedBest = parseInt(readSaved(BEST_KEY), 10);
+      state.best = isNaN(savedBest) ? 0 : savedBest;
+
+      function bi(ja, en) {
+        return '<span class="ja">' + ja + '</span><span class="en">' + en + '</span>';
+      }
+      function clamp(v) { return Math.max(0, Math.min(255, Math.round(v))); }
+      function randomColor() {
+        return [0, 0, 0].map(function () { return Math.floor(Math.random() * 256); });
+      }
+      function distance(a, b) {
+        var dr = a[0] - b[0], dg = a[1] - b[1], db = a[2] - b[2];
+        return Math.sqrt(dr * dr + dg * dg + db * db);
+      }
+      function toHex(c) {
+        return '#' + c.map(function (v) { return (v < 16 ? '0' : '') + v.toString(16); }).join('').toUpperCase();
+      }
+      // 背景色に対して読みやすい文字色（相対輝度でざっくり判定）
+      function textOn(c) {
+        var lum = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        return lum > 140 ? '#111' : '#fff';
+      }
+      function randomDirection() {
+        var v, len;
+        do {
+          v = [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1];
+          len = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        } while (len < 0.2 || len > 1);
+        return v.map(function (x) { return x / len; });
+      }
+      function shuffle(arr) {
+        for (var i = arr.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+        }
+        return arr;
+      }
+
+      // 正解の周りに、距離 d 前後のまぎらわしい色を散らす
+      function makeChoices(target, d) {
+        var list = [target];
+        var tries = 0;
+        function farEnough(c, minDist) {
+          return list.every(function (o) { return distance(o, c) >= minDist; });
+        }
+        while (list.length < CHOICES && tries < MAX_TRIES) {
+          tries++;
+          var dir = randomDirection();
+          var scale = d * (0.85 + Math.random() * 0.5);
+          var c = [clamp(target[0] + dir[0] * scale), clamp(target[1] + dir[1] * scale), clamp(target[2] + dir[2] * scale)];
+          if (distance(c, target) < d * 0.6) continue; // 端で切り詰められて近すぎるものは除外
+          if (!farEnough(c, d * 0.5)) continue;
+          list.push(c);
+        }
+        // 色空間の端で候補が足りない場合は、ランダムな色で埋める
+        while (list.length < CHOICES) {
+          var r = randomColor();
+          if (farEnough(r, d * 0.5)) list.push(r);
+        }
+        return shuffle(list);
+      }
+
+      function renderStatus() {
+        el.score.textContent = String(state.score);
+        el.best.textContent = String(state.best);
+        el.best2.textContent = String(state.best);
+        var html = '';
+        for (var i = 0; i < MAX_LIVES; i++) {
+          html += i < state.lives ? '◆' : '<span class="lost">◇</span>';
+        }
+        el.lives.innerHTML = html;
+        el.lives.setAttribute('aria-label', 'Lives ' + state.lives + ' / ' + MAX_LIVES);
+      }
+
+      function newQuestion() {
+        var d = Math.max(DIST_MIN, DIST_START * Math.pow(DIST_DECAY, state.score));
+        var target = randomColor();
+        state.choices = makeChoices(target, d);
+        state.answer = state.choices.indexOf(target);
+        state.answered = false;
+
+        el.code.textContent = toHex(target);
+        el.grid.innerHTML = '';
+        state.choices.forEach(function (c, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'swatch';
+          b.style.background = toHex(c);
+          b.style.setProperty('--fg', textOn(c));
+          b.setAttribute('aria-label', String(i + 1));
+          b.innerHTML = '<span class="key">' + (i + 1) + '</span><span class="hex">' + toHex(c) + '</span>';
+          b.addEventListener('click', function () { pick(i); });
+          el.grid.appendChild(b);
+        });
+        el.game.classList.remove('answered');
+        el.feedback.innerHTML = '';
+        el.rgb.innerHTML = '';
+        el.next.hidden = true;
+      }
+
+      function renderRgb(c) {
+        var hex = toHex(c).slice(1);
+        el.rgb.innerHTML = CHANNELS.map(function (ch, i) {
+          var pair = hex.substr(i * 2, 2);
+          return '<div class="rgb-row">' +
+            '<span class="ch" style="color:' + ch.color + '">' + bi(ch.ja, ch.en) + '</span>' +
+            '<code>' + pair + '</code>' +
+            '<span class="bar"><i style="width:' + (c[i] / 255 * 100).toFixed(1) + '%;background:' + ch.color + '"></i></span>' +
+            '<span class="num">' + c[i] + '</span>' +
+            '</div>';
+        }).join('');
+      }
+
+      function pick(i) {
+        if (state.answered || state.over) return;
+        state.answered = true;
+        var correct = i === state.answer;
+        var buttons = el.grid.querySelectorAll('.swatch');
+        buttons.forEach(function (b) { b.disabled = true; });
+        buttons[state.answer].classList.add('correct');
+        buttons[i].classList.add('picked');
+        el.game.classList.add('answered');
+
+        if (correct) {
+          state.score++;
+          el.feedback.innerHTML = '<div class="verdict ok">' + bi('正解！', 'Correct!') + '</div>';
+        } else {
+          state.lives--;
+          el.feedback.innerHTML = '<div class="verdict ng">' +
+            bi('ざんねん。正解は ' + (state.answer + 1) + ' 番', 'Not quite — it was #' + (state.answer + 1)) +
+            '</div>';
+        }
+        renderRgb(state.choices[state.answer]);
+        renderStatus();
+        el.next.hidden = false;
+        el.next.focus({ preventScroll: true });
+      }
+
+      function next() {
+        if (!state.answered || state.over) return;
+        if (state.lives <= 0) { gameOver(); return; }
+        newQuestion();
+      }
+
+      function gameOver() {
+        state.over = true;
+        var isNewBest = state.score > state.best;
+        if (isNewBest) {
+          state.best = state.score;
+          save(BEST_KEY, String(state.best));
+        }
+        el.final.textContent = String(state.score);
+        el.newbest.innerHTML = isNewBest && state.score > 0 ? bi('ベスト更新！', 'New best!') : '';
+        renderStatus();
+        el.game.classList.add('is-over');
+        el.retry.focus({ preventScroll: true });
+      }
+
+      function start() {
+        state.score = 0;
+        state.lives = MAX_LIVES;
+        state.over = false;
+        el.game.classList.remove('is-over');
+        renderStatus();
+        newQuestion();
+      }
+
+      el.next.addEventListener('click', next);
+      el.retry.addEventListener('click', start);
+      document.addEventListener('keydown', function (e) {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        var n = parseInt(e.key, 10);
+        if (!state.answered && !state.over && n >= 1 && n <= CHOICES) {
+          e.preventDefault();
+          pick(n - 1);
+        } else if (e.key === 'Enter' && state.over && document.activeElement !== el.retry) {
+          e.preventDefault();
+          start();
+        } else if (e.key === 'Enter' && state.answered && !state.over && document.activeElement !== el.next) {
+          e.preventDefault();
+          next();
+        }
+      });
+
+      start();
+    })();
+  </script>
+</body>
+</html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Keita Higashi — 作品一覧</title>
-  <meta name="description" content="Keita Higashi が作っているゲームとアプリの一覧。iPhone アプリ「CascadeCanvas」、カードゲーム「マジカル・コンペ」。">
+  <meta name="description" content="Keita Higashi が作っているゲームとアプリの一覧。iPhone アプリ「CascadeCanvas」、カードゲーム「マジカル・コンペ」、ブラウザで遊べる「カラーコードあて」。">
   <meta name="theme-color" content="#0e0f17">
   <link rel="canonical" href="https://keitahigashi.github.io/">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -91,6 +91,16 @@
     }
     .work:hover { transform: translateY(-3px); border-color: rgba(232,201,122,0.45); box-shadow: 0 18px 40px rgba(0,0,0,0.4); }
     .work-cover { aspect-ratio: 16 / 9; width: 100%; height: auto; object-fit: cover; }
+    /* 画像を使わない作品カバー（カラーコードあて） */
+    .cover-hex {
+      background: radial-gradient(120% 90% at 50% 0%, #22253a 0%, #12131d 70%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .cover-code { font: 700 clamp(1.6rem, 5vw, 2.1rem) ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace; letter-spacing: 0.06em; color: var(--text); }
+    .cover-swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; width: 70%; }
+    .cover-swatches i { aspect-ratio: 1; border-radius: 8px; }
+    .cover-swatches i:first-child { box-shadow: 0 0 0 2px #7fd1a0; }
     .work-body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
     .work-kind { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
     .work-kind span {
@@ -176,6 +186,22 @@
                 <span class="work-more"><span class="ja">詳しく見る →</span><span class="en">Learn more →</span></span>
                 <a class="work-ext" href="https://cardgr.booth.pm/items/8283933" target="_blank" rel="noopener">BOOTH</a>
                 <a class="work-ext" href="https://unityroom.com/games/magicalcompetition" target="_blank" rel="noopener">unityroom</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="work">
+            <div class="work-cover cover-hex" aria-hidden="true">
+              <span class="cover-code">#3A7BD5</span>
+              <span class="cover-swatches"><i style="background:#3A7BD5"></i><i style="background:#5A6FC9"></i><i style="background:#2F8FC2"></i><i style="background:#4B66E0"></i><i style="background:#2C74E8"></i><i style="background:#5B8CB8"></i></span>
+            </div>
+            <div class="work-body">
+              <p class="work-kind"><span class="ja">ミニゲーム</span><span class="en">Mini game</span><span>Web</span></p>
+              <h2 class="serif-auto"><a href="hexguess/"><span class="ja">カラーコードあて</span><span class="en">Hex Guess</span></a></h2>
+              <p class="work-sub"><span class="ja">Hex Guess · ブラウザですぐ遊べる</span><span class="en">カラーコードあて · Play in your browser</span></p>
+              <p class="work-desc"><span class="ja">#3A7BD5 はどんな色？ カラーコードを見て、6つの色から正解を選ぶ。正解するほど色が近くなり、見分けが難しくなっていく。</span><span class="en">What color is #3A7BD5? Read the hex code and pick the match from six. The more you get right, the closer the colors become.</span></p>
+              <div class="work-links">
+                <span class="work-more"><span class="ja">遊ぶ →</span><span class="en">Play →</span></span>
               </div>
             </div>
           </article>
